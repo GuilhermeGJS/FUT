@@ -1,47 +1,36 @@
-name: ⚽ ANLS — Atualização Diária Automática
+name: ⚽ ANLS — Análise Diária Automática
 
 on:
   schedule:
-    # Executa todo dia às 10:00 UTC (7:00 Brasília)
-    - cron: "0 10 * * *"
-  workflow_dispatch:
-    # Permite rodar manualmente pelo botão no GitHub
+    - cron: "0 10 * * *"  # 10:00 UTC = 7:00 Brasília
+  workflow_dispatch:       # Botão manual no GitHub
 
 jobs:
-  update-results:
+  analyse:
     runs-on: ubuntu-latest
     permissions:
       contents: write
     steps:
-      - name: Checkout repo
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: 📅 Data de hoje
-        id: date
-        run: echo "TODAY=$(date +%Y-%m-%d)" >> $GITHUB_OUTPUT
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
 
-      - name: 🔍 Buscar resultados da Copa 2026
-        run: |
-          echo "=== ANLS — Atualização Diária ==="
-          echo "Data: $(date)"
-          echo "Buscando resultados dos jogos de hoje..."
-          echo ""
-          echo "🏟️ Este workflow mantém o dashboard atualizado diariamente."
-          echo "📊 Para análise estatística completa (Poisson, Elo, Monte Carlo),"
-          echo "   abra o Claude Code e execute: analisar jogos de hoje"
-          echo ""
-          echo "✅ Dashboard: https://fut-otez.onrender.com"
-          echo "📋 Repo: https://github.com/GuilhermeGJS/FUT"
+      - name: Install dependencies
+        run: pip install requests google-genai
 
-      - name: 📝 Registrar data da última atualização
-        run: |
-          echo "$(date -u +"%Y-%m-%d %H:%M UTC")" > .last-update
-          echo "Última verificação: $(cat .last-update)"
+      - name: ⚽ Rodar análise com Gemini
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: python update_football.py
 
       - name: 💾 Commit e push automático
         run: |
           git config user.name "ANLS Bot"
           git config user.email "bot@anls.dev"
-          git add .last-update
+          git add dashboard.html index.html .last-update
           git diff --staged --quiet || git commit -m "🔄 Atualização diária automática — $(date +%Y-%m-%d)"
           git push

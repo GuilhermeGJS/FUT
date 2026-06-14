@@ -172,15 +172,130 @@
   .panel{display:none}
   .panel.active{display:block}
 
-  /* RESPONSIVE */
-  @media(max-width:768px){
-    .header{padding:10px 14px}
-    .header h1{font-size:15px}
+  /* ── UPDATE BUTTON ── */
+  .btn-update{
+    background:linear-gradient(135deg,var(--green),#059669);color:#fff;
+    padding:10px 22px;border-radius:10px;font-weight:700;font-size:13px;
+    cursor:pointer;border:none;transition:all 0.2s;display:flex;align-items:center;gap:8px;
+    animation:glow 2s infinite;box-shadow:0 0 20px rgba(16,185,129,0.3);
+  }
+  .btn-update:hover{transform:translateY(-2px);box-shadow:0 6px 30px rgba(16,185,129,0.5)}
+  @keyframes glow{0%,100%{box-shadow:0 0 20px rgba(16,185,129,0.3)}50%{box-shadow:0 0 35px rgba(16,185,129,0.6)}}
+  .btn-update:active{transform:scale(0.96)}
+
+  /* ── RESPONSIVE — MOBILE FIRST ── */
+  @media(max-width:1024px){
+    .main{padding:12px 12px 60px}
+    .tab-btn{padding:8px 14px;font-size:11px;gap:4px}
+    .tab-btn span{display:none}
     .match-list{grid-template-columns:1fr}
     .groups-grid{grid-template-columns:1fr}
-    .detail-modal{max-height:90vh;padding:16px}
     .ratings-grid{grid-template-columns:1fr}
-    .date-nav{overflow-x:auto;-webkit-overflow-scrolling:touch}
+    .stats-bar{grid-template-columns:repeat(4,1fr);gap:6px}
+    .stat-card{padding:10px 8px}
+    .stat-card .value{font-size:22px}
+    .stat-card .label{font-size:8px}
+  }
+  @media(max-width:768px){
+    /* HEADER MOBILE */
+    .header{padding:8px 10px;gap:6px;justify-content:center}
+    .header-left{gap:8px}
+    .logo{font-size:24px}
+    .header h1{font-size:13px}
+    .header h1 span{display:block}
+    .header-right{gap:4px;width:100%;justify-content:center}
+    .header-badge{font-size:8px;padding:2px 8px}
+
+    /* BUTTONS MOBILE */
+    .btn{padding:6px 10px;font-size:10px;gap:4px;border-radius:6px}
+    .btn-update{padding:8px 14px;font-size:11px;width:100%;justify-content:center}
+    .btn-sm{padding:4px 8px;font-size:9px}
+    .btn-xs{padding:2px 6px;font-size:8px}
+
+    /* TABS MOBILE — scroll horizontal */
+    .tab-nav{gap:1px;margin-bottom:10px}
+    .tab-btn{padding:6px 10px;font-size:10px;white-space:nowrap;gap:3px;border-radius:6px 6px 0 0}
+
+    /* MAIN MOBILE */
+    .main{padding:8px 8px 70px}
+
+    /* STATS BAR MOBILE */
+    .stats-bar{grid-template-columns:repeat(4,1fr);gap:4px;margin-bottom:10px}
+    .stat-card{padding:8px 5px;border-radius:8px}
+    .stat-card .value{font-size:16px}
+    .stat-card .label{font-size:7px}
+
+    /* MATCH ROW MOBILE */
+    .match-row{padding:8px 10px;gap:6px;border-radius:8px;flex-wrap:wrap}
+    .match-row .match-time{min-width:40px;font-size:9px}
+    .match-row .match-time div:first-child{font-size:9px}
+    .match-row .match-teams{font-size:11px;gap:3px}
+    .match-row .flag{font-size:18px}
+    .match-row .name{font-size:10px}
+    .match-row .vs{font-size:9px}
+    .match-group{font-size:8px;min-width:25px}
+    .match-conf{min-width:40px;font-size:8px}
+
+    /* SCORE BOX MOBILE */
+    .score-box{gap:4px;min-width:50px}
+    .score-box .s{font-size:15px;padding:2px 6px;min-width:24px}
+    .score-sep{font-size:11px}
+
+    /* DATE NAV MOBILE */
+    .date-nav{gap:3px;padding-bottom:6px}
+    .date-chip{padding:5px 9px;font-size:10px}
+
+    /* GROUP CARDS MOBILE */
+    .group-card{border-radius:10px}
+    .group-card-header{padding:8px 12px;font-size:12px}
+    .group-card-body{padding:8px 12px}
+    .group-match{font-size:10px;padding:6px 0}
+
+    /* DETAIL MODAL MOBILE */
+    .detail-overlay{padding:8px}
+    .detail-modal{padding:12px;border-radius:12px;max-height:92vh}
+    .detail-modal .close-btn{top:6px;right:8px;font-size:20px;width:28px;height:28px}
+
+    /* TODAY ANALYSIS MOBILE */
+    .ratings-grid{grid-template-columns:1fr;gap:4px}
+
+    /* PROB BARS MOBILE */
+    .prob-row{margin-bottom:4px;gap:4px}
+    .prob-label{width:35px;font-size:9px}
+    .prob-bar{font-size:8px;padding-left:4px}
+    .prob-bar-wrap{height:16px;border-radius:4px}
+    .prob-bar{border-radius:4px}
+
+    /* SUMMARY MOBILE */
+    .day-summary{grid-template-columns:repeat(3,1fr);gap:6px}
+    .summary-card{padding:8px;font-size:10px}
+    .summary-card .num{font-size:16px}
+
+    /* KNOCKOUT MOBILE */
+    .panel-knockout .match-row{font-size:10px}
+
+    /* TEAMS MOBILE */
+    #teamsContent > div{grid-template-columns:1fr!important}
+
+    /* GEMINI PANEL MOBILE */
+    #panel-gemini > div{padding:14px!important}
+  }
+
+  @media(max-width:480px){
+    /* TINY SCREEN */
+    .header h1{font-size:11px}
+    .logo{font-size:20px}
+    .header-badge{font-size:7px}
+    .stats-bar{grid-template-columns:repeat(3,1fr)}
+    .tab-btn{font-size:9px;padding:5px 7px}
+    .match-row{padding:6px 8px}
+    .match-row .flag{font-size:16px}
+    .match-row .name{font-size:9px}
+    .match-row .match-time{min-width:35px;font-size:8px}
+    .score-box .s{font-size:13px;padding:2px 4px;min-width:20px}
+    .date-chip{padding:4px 7px;font-size:9px}
+    .detail-modal{padding:10px}
+    .day-summary{grid-template-columns:repeat(2,1fr)}
   }
 </style>
 </head>
@@ -197,7 +312,8 @@
   <div class="header-right">
     <span class="header-badge" id="statusBadge">🟢 AO VIVO</span>
     <button class="btn btn-outline btn-sm" onclick="goToToday()">📅 Hoje</button>
-    <button class="btn btn-sm btn-accent2" onclick="openAnalysisPanel()">📊 Análise do Dia</button>
+    <button class="btn btn-sm btn-accent2" onclick="openAnalysisPanel()">📊 Análise</button>
+    <button class="btn-update" onclick="forceRefresh()" title="Atualizar dados do site">🔄 ATUALIZAR</button>
   </div>
 </header>
 
@@ -216,13 +332,13 @@
   </div>
 
   <div class="tab-nav">
-    <button class="tab-btn active" onclick="switchTab('calendar')">📅 Calendário</button>
-    <button class="tab-btn" onclick="switchTab('groups')">🏆 Grupos</button>
-    <button class="tab-btn" onclick="switchTab('today')">⚡ Hoje (14 Jun)</button>
-    <button class="tab-btn" onclick="switchTab('results')">✅ Resultados</button>
-    <button class="tab-btn" onclick="switchTab('knockout')">🏟️ Mata-Mata</button>
-    <button class="tab-btn" onclick="switchTab('teams')">🌍 Seleções</button>
-    <button class="tab-btn" onclick="switchTab('methodology')">📊 Metodologia</button>
+    <button class="tab-btn" onclick="switchTab('gemini')">🤖<span> Gemini</span></button>
+    <button class="tab-btn" onclick="switchTab('calendar')">📅<span> Calendário</span></button>
+    <button class="tab-btn" onclick="switchTab('groups')">🏆<span> Grupos</span></button>
+    <button class="tab-btn" onclick="switchTab('today')">⚡<span> Análise</span></button>
+    <button class="tab-btn" onclick="switchTab('results')">✅<span> Resultados</span></button>
+    <button class="tab-btn" onclick="switchTab('knockout')">🏟️<span> Mata-Mata</span></button>
+    <button class="tab-btn" onclick="switchTab('teams')">🌍<span> Seleções</span></button>
   </div>
 
   <!-- ═════ PANEL: CALENDAR ═════ -->
@@ -238,9 +354,21 @@
     <div class="groups-grid" id="groupsGrid"></div>
   </div>
 
+  <!-- ═════ PANEL: GEMINI ═════ -->
+  <div class="panel" id="panel-gemini">
+    <div class="section-header"><h2>🤖 <span>Análise ao Vivo — Gemini 2.0 Flash</span> — Gratuito</h2></div>
+    <!-- ⬇️ GEMINI_ANALYSIS_CONTENT_START ⬇️ -->
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:24px;color:var(--muted);text-align:center">
+      <p style="font-size:16px">🤖 Análise sendo gerada pelo Gemini...</p>
+      <p style="font-size:12px;margin-top:8px">O sistema atualiza automaticamente todo dia às 7:00 (Brasília)</p>
+    </div>
+    <!-- ⬆️ GEMINI_ANALYSIS_CONTENT_END ⬆️ -->
+    <div id="geminiStatus" style="text-align:center;margin-top:8px;font-size:10px;color:var(--muted)"></div>
+  </div>
+
   <!-- ═════ PANEL: TODAY ═════ -->
   <div class="panel" id="panel-today">
-    <div class="section-header"><h2>⚡ <span>Análise Completa</span> — 14 de Junho de 2026</h2></div>
+    <div class="section-header"><h2>⚡ <span>Análise Estatística</span> — Jogos do Dia</h2></div>
     <div id="todayAnalysis"></div>
   </div>
 
@@ -704,6 +832,19 @@ function switchTab(tabName){
 // ═══════ ACTIONS ═══════
 function goToToday(){selectedDate=TODAY;switchTab("calendar");renderDateNav();selectDate(TODAY);document.getElementById("calendarDateLabel").scrollIntoView({behavior:"smooth"});}
 function openAnalysisPanel(){switchTab("today");}
+function forceRefresh(){
+  const btn=document.querySelector(".btn-update");
+  const origText=btn.innerHTML;
+  btn.innerHTML="⏳ ATUALIZANDO...";
+  btn.style.animation="none";
+  btn.style.opacity="0.7";
+  showToast("🔄 Buscando dados mais recentes...");
+
+  // Recarrega a página forçando bypass do cache
+  setTimeout(()=>{
+    location.reload(true);
+  }, 800);
+}
 function showToast(msg,isErr){const t=document.getElementById("toast");t.textContent=msg;t.className="toast "+(isErr?"error":"")+" show";setTimeout(()=>t.classList.remove("show"),2500);}
 
 // KEYBOARD
