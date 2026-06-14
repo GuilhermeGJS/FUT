@@ -4,8 +4,11 @@
 GitHub Actions roda todo dia às 7:00 Brasília
 Injeta a análise direto no dashboard.html
 """
+import sys, io
+sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
+sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8')
 
-import os, re, json
+import os, re, json, time
 from datetime import datetime, timezone, timedelta
 from google import genai
 
@@ -157,17 +160,38 @@ for line in SCHEDULE.strip().split("\n"):
 print(f"✅ {len(completed)} resultados registrados")
 
 # ── 3. Chamar Gemini ─────────────────────────────────
-def ask_gemini(prompt):
-    try:
-        resp = client.models.generate_content(
-            model="gemini-2.0-flash",
-            contents=prompt,
-            config={"temperature": 0.4, "max_output_tokens": 8192}
-        )
-        return resp.text
-    except Exception as e:
-        print(f"⚠️ Erro: {e}")
-        return None
+def ask_gemini(prompt, retries=3):
+    """Chama Gemini com retry automático e fallback entre modelos gratuitos."""
+    models = [
+        "gemini-2.0-flash",
+        "gemini-2.5-flash-lite",
+        "gemini-1.5-flash",
+        "gemini-1.5-flash-8b",
+    ]
+    for attempt in range(retries):
+        model = models[attempt % len(models)]
+        try:
+            print(f"   🤖 Tentativa {attempt+1}/{retries} — modelo: {model}")
+            resp = client.models.generate_content(
+                model=model,
+                contents=prompt,
+                config={"temperature": 0.4, "max_output_tokens": 8192}
+            )
+            print(f"   ✅ Resposta recebida ({len(resp.text)} caracteres)")
+            return resp.text
+        except Exception as e:
+            err = str(e)
+            if "429" in err or "RESOURCE_EXHAUSTED" in err or "quota" in err.lower():
+                wait = 15 * (attempt + 1)
+                print(f"   ⏳ Cota cheia — aguardando {wait}s...")
+                time.sleep(wait)
+            elif "404" in err or "not found" in err.lower():
+                print(f"   ⚠️ Modelo {model} indisponível, tentando próximo...")
+                continue
+            else:
+                print(f"   ⚠️ Erro: {e}")
+                continue
+    return None
 
 # Se não tem jogos hoje, gera resumo geral
 if not today_matches:
@@ -224,6 +248,12 @@ print("💾 Injetando análise no dashboard...")
 def inject_into_html(filepath, content):
     with open(filepath, "r", encoding="utf-8") as f:
         html = f.read()
+
+    # Limpa marcadores de código markdown que o Gemini às vezes inclui
+    content = re.sub(r'^```(?:html)?\s*\n?', '', content, count=1)
+    content = re.sub(r'\n?\s*```\s*$', '', content, count=1)
+    content = re.sub(r'^<body[^>]*>', '', content)
+    content = re.sub(r'</body>\s*$', '', content)
 
     start_marker = "<!-- ⬇️ GEMINI_ANALYSIS_CONTENT_START ⬇️ -->"
     end_marker = "<!-- ⬆️ GEMINI_ANALYSIS_CONTENT_END ⬆️ -->"
