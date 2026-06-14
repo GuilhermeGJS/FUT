@@ -184,7 +184,7 @@ Tunisia: 0 GC nas eliminatorias. Porem 0 GOLS EM 350+ MIN. Perdeu 5-0 da Belgica
 """
 
 print("=" * 70)
-print("ANLS — Gemini 2.0 Flash | Analise Multi-Dia Profissional")
+print("ANLS -- Gemini 2.0 Flash | Analise Multi-Dia Profissional")
 print(f"Data: {TODAY_BR}")
 print("=" * 70)
 
@@ -253,11 +253,11 @@ def ask_gemini(prompt, temp=0.3):
         except Exception as e:
             err = str(e)
             if "429" in err or "quota" in err.lower():
-                w = 15*(attempt+1); print(f"   Cota — {w}s..."); time.sleep(w)
+                w = 15*(attempt+1); print(f"   Cota -- {w}s..."); time.sleep(w)
             else: print(f"   Erro: {err[:100]}")
     return None
 
-# ====== GEMINI SO GERA JSON — PYTHON MONTA O HTML BONITO ======
+# ====== GEMINI SO GERA JSON -- PYTHON MONTA O HTML BONITO ======
 def build_analysis_json_prompt():
     """Pede ao Gemini JSON estruturado para cada partida."""
     # Lista todas as partidas com dados
@@ -336,26 +336,26 @@ SUA TAREFA: Para CADA partida, gere um JSON com estes campos exatos:
       "away_players": "Jogador X (clube) - motivo curto; Jogador Y (clube) - motivo curto",
       "injuries_home": "desfalques reais do time A",
       "injuries_away": "desfalques reais do time B",
-      "analysis": "2-3 frases analisando MATEMATICAMENTE o confronto. Use os ratings, Elo, GE fornecidos. Mencione o GE calculado (atk/100 * def_adv/100 * 3.5). Tom de scout profissional, nao torcedor."
+      "analysis": "4-5 FRASES DETALHADAS. OBRIGATORIO mencionar: Elo (ex: Elo 1950 vs 1420, diferenca de 530 pts), GE calculado (ex: GE=3.18 pois (91/100*45/100*3.5)=3.18), rating mais discrepante (ex: Ataque 91 vs Defesa 45), e conclusao tatica fundamentada. NAO use aproximado, use o numero EXATO do calculo. Tom de scout de elite."
     }}
   ]
 }}
 
 REGRAS ABSOLUTAS:
-1. As 3 probabilidades DEVEM somar exatamente 100.
-2. GE ofensivo = (atk / 100) * (def_adv / 100) * 3.5. Use esse numero na analise.
-3. NIVEIS: prob >= 70 → ALTO | 40-69 → MEDIO | < 40 → BAIXO
-4. Use os dados do JSON. NAO invente times ou jogadores que nao estao no contexto.
-5. Jogadores-chave: escolha nomes REAIS de cada selecao. Se nao souber, diga "Dados indisponiveis".
-6. Lesoes: use APENAS as do CONTEXTO fornecido. Se nao houver info, diga "Nenhum desfalque relevante".
-7. Retorne APENAS o JSON, sem marcadores ```json```, sem explicacoes.
-8. Seja CIRURGICO nos numeros. Analista de elite."""
+1. As 3 probabilidades DEVEM somar exatamente 100. Confira antes de entregar.
+2. NIVEIS: prob_home >= 70 → ALTO | 40-69 → MEDIO | < 40 → BAIXO
+3. Use os dados do JSON recebido. NAO invente times ou jogadores.
+4. Jogadores-chave REAIS: Musiala/Wirtz/Gundogan(ALE), Vini Jr/Rodrygo(BRA), Mbappe(FRANCA), Messi(ARG), De Bruyne/Lukaku(BEL), Salah(EGITO), Kubo/Doan(JAPAO), Van Dijk/De Jong(HOLANDA), Gyokeres/Isak(SUECIA), Caicedo/Hincapie(EQUADOR), Haaland/Odegaard(NORUEGA) etc. Se nao souber, use "Dados indisponiveis".
+5. Lesoes: use APENAS as do CONTEXTO. Ex: Alemanha sem Gnabry e Karl. Japao sem Mitoma, Minamino, Endo.
+6. Retorne APENAS o JSON valido, sem ```json```, sem explicacoes extras.
+7. A analise DEVE ter no minimo 4 frases. Cada frase aborda um pilar: (a) comparacao de Elo e o que significa, (b) forca vs fraqueza mais gritante (ex: Ataque 91 vs Defesa 45 = desequilibrio extremo), (c) impacto de desfalques ou contexto tatico, (d) conclusao com placar esperado."
 
 def render_beautiful_card(m, day_label):
-    """Python monta o card HTML bonito — Gemini so forneceu os dados."""
-    # Calcula GE
-    ge_h = round((m["home_atk"]/100) * (m["away_def"]/100) * 3.5, 2)
-    ge_a = round((m["away_atk"]/100) * (m["home_def"]/100) * 3.5, 2)
+    """Python monta o card HTML bonito - Gemini so forneceu os dados."""
+    # Calcula GE (Gols Esperados): quanto maior o ataque E pior a defesa adversaria, maior o GE
+    # Quanto menor a defesa (mais fraca), maior a fraqueza defensiva = (100 - def)/100
+    ge_h = round((m["home_atk"]/100) * ((100 - m["away_def"])/100) * 5.5, 2)
+    ge_a = round((m["away_atk"]/100) * ((100 - m["home_def"])/100) * 5.5, 2)
     elo_diff = abs(m["home_elo"] - m["away_elo"])
 
     # Calcula media geral
@@ -387,7 +387,7 @@ def render_beautiful_card(m, day_label):
   <!-- CABECALHO DO CONFRONTO -->
   <div style="display:flex;align-items:center;justify-content:center;gap:16px;margin-bottom:16px">
     <div style="text-align:center;flex:1">
-      <span style="font-size:40px">🏳️</span>
+      <span style="font-size:40px">[FUT]</span>
       <div style="font-weight:800;font-size:16px;color:#e2e8f0;margin-top:4px">{m["home"]}</div>
       <div style="font-size:10px;color:#94a3b8">Elo {m["home_elo"]} | {m["home_mkt"]}</div>
     </div>
@@ -396,7 +396,7 @@ def render_beautiful_card(m, day_label):
       <div style="font-size:10px;color:#64748b;margin-top:2px">{m.get("time","")}</div>
     </div>
     <div style="text-align:center;flex:1">
-      <span style="font-size:40px">🏳️</span>
+      <span style="font-size:40px">[FUT]</span>
       <div style="font-weight:800;font-size:16px;color:#e2e8f0;margin-top:4px">{m["away"]}</div>
       <div style="font-size:10px;color:#94a3b8">Elo {m["away_elo"]} | {m["away_mkt"]}</div>
     </div>
@@ -409,9 +409,9 @@ def render_beautiful_card(m, day_label):
 
   <!-- MODELO -->
   <div style="display:flex;gap:8px;justify-content:center;margin:12px 0;flex-wrap:wrap">
-    <span style="font-size:10px;background:rgba(59,130,246,0.15);color:#60a5fa;padding:4px 10px;border-radius:12px">GE {ge_h} vs {ge_a}</span>
+    <span style="font-size:10px;background:rgba(59,130,246,0.15);color:#60a5fa;padding:4px 10px;border-radius:12px">GE {{ge_h}} vs {{ge_a}}</span>
     <span style="font-size:10px;background:rgba(245,158,11,0.15);color:#fbbf24;padding:4px 10px;border-radius:12px">Elo Δ {elo_diff} pts</span>
-    <span style="font-size:10px;background:rgba(6,182,212,0.15);color:#22d3ee;padding:4px 10px;border-radius:12px">Monte Carlo 10K</span>
+    <span style="font-size:10px;background:rgba(6,182,212,0.15);color:#22d3ee;padding:4px 10px;border-radius:12px">Monte Carlo 10 mil</span>
     <span style="font-size:10px;background:rgba(239,68,68,0.15);color:#f87171;padding:4px 10px;border-radius:12px">xG</span>
   </div>
 
@@ -441,26 +441,26 @@ def render_beautiful_card(m, day_label):
   <!-- JOGADORES E LESOES -->
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0;font-size:11px">
     <div style="background:rgba(6,182,212,0.05);border:1px solid rgba(6,182,212,0.2);border-radius:8px;padding:10px">
-      <div style="color:#22d3ee;font-weight:700;margin-bottom:4px">⭐ {m["home"]}</div>
+      <div style="color:#22d3ee;font-weight:700;margin-bottom:4px">* {m["home"]}</div>
       <div style="color:#cbd5e1;line-height:1.5">{players_h}</div>
     </div>
     <div style="background:rgba(6,182,212,0.05);border:1px solid rgba(6,182,212,0.2);border-radius:8px;padding:10px">
-      <div style="color:#22d3ee;font-weight:700;margin-bottom:4px">⭐ {m["away"]}</div>
+      <div style="color:#22d3ee;font-weight:700;margin-bottom:4px">* {m["away"]}</div>
       <div style="color:#cbd5e1;line-height:1.5">{players_a}</div>
     </div>
     <div style="background:rgba(239,68,68,0.05);border:1px solid rgba(239,68,68,0.2);border-radius:8px;padding:10px">
-      <div style="color:#f87171;font-weight:700;margin-bottom:4px">🏥 {m["home"]}</div>
+      <div style="color:#f87171;font-weight:700;margin-bottom:4px">[MED] {m["home"]}</div>
       <div style="color:#cbd5e1;line-height:1.5">{injuries_h}</div>
     </div>
     <div style="background:rgba(239,68,68,0.05);border:1px solid rgba(239,68,68,0.2);border-radius:8px;padding:10px">
-      <div style="color:#f87171;font-weight:700;margin-bottom:4px">🏥 {m["away"]}</div>
+      <div style="color:#f87171;font-weight:700;margin-bottom:4px">[MED] {m["away"]}</div>
       <div style="color:#cbd5e1;line-height:1.5">{injuries_a}</div>
     </div>
   </div>
 
   <!-- ANALISE -->
   <div style="background:rgba(139,92,246,0.05);border:1px solid rgba(139,92,246,0.2);border-radius:8px;padding:12px;margin:12px 0">
-    <div style="color:#a78bfa;font-weight:700;margin-bottom:6px;font-size:12px">🧠 ANALISE TECNICA</div>
+    <div style="color:#a78bfa;font-weight:700;margin-bottom:6px;font-size:12px">[ANL] ANALISE TECNICA</div>
     <p style="color:#cbd5e1;font-size:12px;line-height:1.7;margin:0">{analysis}</p>
   </div>
 
@@ -469,9 +469,9 @@ def render_beautiful_card(m, day_label):
     <div>
       <span style="font-size:10px;color:#94a3b8">PLACAR MAIS PROVAVEL</span>
       <div style="display:flex;gap:12px;margin-top:4px">
-        <span style="background:rgba(16,185,129,0.15);color:#10b981;padding:4px 10px;border-radius:6px;font-size:12px;font-weight:700">🥇 {s1}</span>
-        <span style="background:rgba(148,163,184,0.1);color:#94a3b8;padding:4px 10px;border-radius:6px;font-size:11px">🥈 {s2}</span>
-        <span style="background:rgba(148,163,184,0.1);color:#94a3b8;padding:4px 10px;border-radius:6px;font-size:11px">🥉 {s3}</span>
+        <span style="background:rgba(16,185,129,0.15);color:#10b981;padding:4px 10px;border-radius:6px;font-size:12px;font-weight:700">#1 {s1}</span>
+        <span style="background:rgba(148,163,184,0.1);color:#94a3b8;padding:4px 10px;border-radius:6px;font-size:11px">#2 {s2}</span>
+        <span style="background:rgba(148,163,184,0.1);color:#94a3b8;padding:4px 10px;border-radius:6px;font-size:11px">#3 {s3}</span>
       </div>
     </div>
     <div style="text-align:right">
@@ -483,7 +483,7 @@ def render_beautiful_card(m, day_label):
 
 # ====== EXECUTAR ======
 if mode != "worldcup":
-    print("\nModo ligas — nao implementado neste script (use versao anterior)")
+    print("\nModo ligas -- nao implementado neste script (use versao anterior)")
     sys.exit(0)
 
 if total_matches == 0:
@@ -491,7 +491,7 @@ if total_matches == 0:
     sys.exit(0)
 
 # 1) Gemini gera JSON com os dados
-print(f"\n{total_matches} partidas em 4 dias — gerando JSON...")
+print(f"\n{total_matches} partidas em 4 dias -- gerando JSON...")
 json_prompt = build_analysis_json_prompt()
 print(f"   Prompt: {len(json_prompt)} chars")
 raw_json = ask_gemini(json_prompt, temp=0.2)
@@ -544,7 +544,7 @@ for i, d in enumerate(date_list):
     all_html += f"""
 <div style="margin-bottom:20px">
 <h2 style="color:{'#10b981' if is_today else '#3b82f6'};font-size:18px;border-bottom:2px solid {'#10b981' if is_today else '#1e293b'};padding-bottom:8px;margin-bottom:12px">
-{'🟢' if is_today else '📅'} {ld} — {fmt_date(d)}
+{'[ON]' if is_today else '[CAL]'} {ld} -- {fmt_date(d)}
 </h2>"""
 
     for sub in ms:
@@ -606,7 +606,7 @@ for i, m in enumerate(sorted_matches):
     </tr>"""
 
 ranking_html = f"""
-<h2 style="color:#f59e0b;margin-top:32px;margin-bottom:12px">🏆 RANKING DE PREVISIBILIDADE — 4 DIAS</h2>
+<h2 style="color:#f59e0b;margin-top:32px;margin-bottom:12px">[RANK] RANKING DE PREVISIBILIDADE -- 4 DIAS</h2>
 <table style="width:100%;font-size:12px;border-collapse:collapse;background:#0f172a;border-radius:12px;overflow:hidden">
 <tr style="background:rgba(59,130,246,0.08);color:#94a3b8;font-size:10px;text-transform:uppercase">
 <th style="padding:10px;text-align:left">#</th><th style="padding:10px;text-align:left">Partida</th><th style="padding:10px;text-align:left">Favorito</th><th style="padding:10px">Prob</th><th style="padding:10px">Confianca</th>
@@ -616,24 +616,28 @@ ranking_html = f"""
 
 # 5) Resumo estatistico
 total_ge = 0
+total_ge_str = "0.0"
+avg_ge_str = "0.00"
 for m in matches_data:
     hd = TEAM_DATA.get(m.get("home", ""), {})
     ad = TEAM_DATA.get(m.get("away", ""), {})
-    total_ge += round((hd.get("r_atk",70)/100) * (ad.get("r_def",70)/100) * 3.5, 2)
-    total_ge += round((ad.get("r_atk",70)/100) * (hd.get("r_def",70)/100) * 3.5, 2)
+    total_ge += round((hd.get("r_atk",70)/100) * ((100 - ad.get("r_def",70))/100) * 5.5, 2)
+    total_ge += round((ad.get("r_atk",70)/100) * ((100 - hd.get("r_def",70))/100) * 5.5, 2)
 
 bt = sum(1 for m in matches_data if m.get("prob_home",50) > 55 and m.get("prob_away",25) > 20)
 over25 = round(total_ge / len(matches_data) * 2, 1) if matches_data else 0
 
+total_ge_str = f"{total_ge:.1f}"
+avg_ge_str = f"{total_ge/len(matches_data):.2f}" if matches_data else "0.00"
 summary_html = f"""
-<h2 style="color:#3b82f6;margin-top:24px;margin-bottom:12px">📊 RESUMO ESTATISTICO</h2>
+<h2 style="color:#3b82f6;margin-top:24px;margin-bottom:12px">[STATS] RESUMO ESTATISTICO</h2>
 <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px">
   <div style="background:#0f172a;border:1px solid #1e293b;border-radius:10px;padding:14px;text-align:center">
     <div style="font-size:24px;font-weight:800;color:#3b82f6">{total_matches}</div>
     <div style="font-size:10px;color:#94a3b8;margin-top:2px">Partidas Analisadas</div>
   </div>
   <div style="background:#0f172a;border:1px solid #1e293b;border-radius:10px;padding:14px;text-align:center">
-    <div style="font-size:24px;font-weight:800;color:#10b981">{total_ge:.1f}</div>
+    <div style="font-size:24px;font-weight:800;color:#10b981">{total_ge_str}</div>
     <div style="font-size:10px;color:#94a3b8;margin-top:2px">Soma GE (Gols Esperados)</div>
   </div>
   <div style="background:#0f172a;border:1px solid #1e293b;border-radius:10px;padding:14px;text-align:center">
@@ -664,11 +668,11 @@ def inject(fpath, content):
     w = f"""{sm}
 <div style="background:#0f172a;border:1px solid #334155;border-radius:16px;padding:24px;color:#e2e8f0;font-family:'Segoe UI',system-ui,sans-serif;line-height:1.6;max-width:900px;margin:0 auto">
 <div style="text-align:center;margin-bottom:24px">
-  <span style="background:rgba(16,185,129,0.15);border:1px solid rgba(16,185,129,0.3);color:#10b981;padding:8px 18px;border-radius:20px;font-size:11px;font-weight:700">GERADO POR GEMINI 2.0 FLASH (GRATIS) — {TODAY_BR} as {t} BRT | {total_matches} PARTIDAS</span>
+  <span style="background:rgba(16,185,129,0.15);border:1px solid rgba(16,185,129,0.3);color:#10b981;padding:8px 18px;border-radius:20px;font-size:11px;font-weight:700">GERADO POR GEMINI 2.0 FLASH (GRATIS) -- {TODAY_BR} as {t} BRT | {total_matches} PARTIDAS</span>
   <div style="margin-top:12px;display:flex;gap:6px;justify-content:center;flex-wrap:wrap">
     <span style="font-size:9px;background:rgba(139,92,246,0.1);color:#a78bfa;padding:3px 8px;border-radius:8px">Poisson</span>
     <span style="font-size:9px;background:rgba(245,158,11,0.1);color:#fbbf24;padding:3px 8px;border-radius:8px">Elo Rating</span>
-    <span style="font-size:9px;background:rgba(6,182,212,0.1);color:#22d3ee;padding:3px 8px;border-radius:8px">Monte Carlo 10K</span>
+    <span style="font-size:9px;background:rgba(6,182,212,0.1);color:#22d3ee;padding:3px 8px;border-radius:8px">Monte Carlo 10 mil</span>
     <span style="font-size:9px;background:rgba(239,68,68,0.1);color:#f87171;padding:3px 8px;border-radius:8px">xG</span>
     <span style="font-size:9px;background:rgba(16,185,129,0.1);color:#10b981;padding:3px 8px;border-radius:8px">Weighted Historical</span>
     <span style="font-size:9px;background:rgba(59,130,246,0.1);color:#60a5fa;padding:3px 8px;border-radius:8px">Verificacao Dupla</span>
