@@ -1,0 +1,35 @@
+{
+  "permissions": {
+    "allow": [
+      "WebSearch(*)",
+      "WebFetch(*)",
+      "Read(*)",
+      "Glob(*)",
+      "Grep(*)",
+      "Bash(git *)",
+      "Bash(npm *)",
+      "Bash(dir *)",
+      "Bash(ls *)",
+      "Bash(start *)",
+      "Bash(open *)",
+      "Bash(xdg-open *)",
+      "PowerShell(Get-ChildItem *)",
+      "PowerShell(Test-Path *)",
+      "PowerShell(Start-Process *)"
+    ]
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo '{\"systemMessage\": \"⚽ SISTEMA ANLS ATIVO — Protocolo de Análise de Futebol Profissional carregado. Dashboard disponível em: dashboard.html | Jobs: análise diária 7:57 AM\"}'",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  }
+}

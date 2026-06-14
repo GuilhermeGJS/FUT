@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: anls-dashboard
+    env: static
+    staticPublishPath: .
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /dashboard.html
+    buildCommand: echo "Static site — no build needed"
+    headers:
+      - path: /*
+        name: Cache-Control
+        value: no-cache

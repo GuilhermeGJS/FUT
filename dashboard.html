@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>⚽ ANLS — FIFA World Cup 2026 | Calendário Completo</title>
+<style>
+  :root {
+    --bg:#0a0e17; --card:#111827; --card2:#161e2c; --accent:#3b82f6;
+    --accent2:#8b5cf6; --gold:#f59e0b; --green:#10b981; --red:#ef4444;
+    --orange:#f97316; --text:#e2e8f0; --muted:#94a3b8; --border:#1e293b;
+    --cyan:#06b6d4; --pink:#ec4899; --win:#10b981; --lose:#ef4444; --draw-color:#f59e0b;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;line-height:1.6}
+  ::-webkit-scrollbar{width:6px}
+  ::-webkit-scrollbar-track{background:var(--bg)}
+  ::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+  ::-webkit-scrollbar-thumb:hover{background:var(--accent)}
+
+  /* HEADER */
+  .header{background:linear-gradient(135deg,#0f172a 0%,#1e293b 50%,#0f172a 100%);border-bottom:2px solid var(--accent);padding:12px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:200;backdrop-filter:blur(12px);flex-wrap:wrap;gap:8px}
+  .header-left{display:flex;align-items:center;gap:12px}
+  .logo{font-size:30px}
+  .header h1{font-size:18px;font-weight:700;letter-spacing:-0.3px;white-space:nowrap}
+  .header h1 span{color:var(--accent)}
+  .header-badge{background:var(--accent);color:#fff;font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;text-transform:uppercase;letter-spacing:1px;animation:pulse 2s infinite;white-space:nowrap}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.7}}
+  .header-right{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .btn{padding:8px 16px;border-radius:8px;font-weight:600;font-size:12px;cursor:pointer;border:none;transition:all 0.2s;display:flex;align-items:center;gap:6px;white-space:nowrap}
+  .btn-primary{background:var(--accent);color:#fff}
+  .btn-primary:hover{background:#2563eb;transform:translateY(-1px);box-shadow:0 4px 16px rgba(59,130,246,0.4)}
+  .btn-outline{background:transparent;border:1px solid var(--border);color:var(--text)}
+  .btn-outline:hover{border-color:var(--accent);background:rgba(59,130,246,0.1)}
+  .btn-sm{padding:5px 12px;font-size:11px}
+  .btn-xs{padding:3px 8px;font-size:10px;border-radius:4px}
+  .btn-accent2{background:var(--accent2);color:#fff}
+  .btn-accent2:hover{opacity:0.9;transform:translateY(-1px)}
+
+  /* STATS BAR */
+  .stats-bar{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:20px}
+  .stat-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px 16px;text-align:center;transition:all 0.25s;cursor:pointer}
+  .stat-card:hover{border-color:var(--accent);transform:translateY(-2px)}
+  .stat-card .value{font-size:28px;font-weight:800;letter-spacing:-1px}
+  .stat-card .label{font-size:10px;color:var(--muted);margin-top:2px;text-transform:uppercase;letter-spacing:0.5px}
+  .val-blue{color:var(--accent)} .val-green{color:var(--green)} .val-gold{color:var(--gold)}
+  .val-red{color:var(--red)} .val-cyan{color:var(--cyan)} .val-purple{color:var(--accent2)}
+
+  /* DATE NAVIGATOR */
+  .date-nav{display:flex;gap:6px;margin-bottom:16px;overflow-x:auto;padding-bottom:8px;flex-wrap:wrap}
+  .date-chip{padding:8px 14px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid var(--border);background:var(--card);color:var(--muted);white-space:nowrap;transition:all 0.2s}
+  .date-chip:hover{border-color:var(--accent);color:var(--text)}
+  .date-chip.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+  .date-chip.today{border-color:var(--green);color:var(--green)}
+  .date-chip.selected{border-color:var(--accent2);color:var(--accent2)}
+  .date-chip.done{text-decoration:line-through;opacity:0.5}
+
+  /* MAIN */
+  .main{max-width:1500px;margin:0 auto;padding:16px 24px 40px}
+
+  /* SECTION HEADER */
+  .section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px}
+  .section-header h2{font-size:18px;font-weight:700}
+  .section-header h2 span{color:var(--accent)}
+
+  /* MATCH LIST */
+  .match-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(380px,1fr));gap:10px;margin-bottom:24px}
+  .match-row{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px 16px;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;gap:12px;position:relative}
+  .match-row:hover{border-color:var(--accent);transform:translateX(2px);background:var(--card2)}
+  .match-row.played{border-left:3px solid var(--border);background:rgba(15,23,42,0.4)}
+  .match-row.played .name{color:var(--muted)}
+  .match-row.today{border-left:3px solid var(--green)}
+  .match-time{font-size:11px;color:var(--muted);min-width:50px;text-align:center}
+  .match-teams{flex:1;display:flex;align-items:center;gap:6px}
+  .match-teams .flag{font-size:22px}
+  .match-teams .name{font-size:13px;font-weight:600}
+  .match-teams .vs{font-size:11px;color:var(--muted);margin:0 2px}
+
+  /* SCORE BOX */
+  .score-box{display:flex;align-items:center;gap:8px;min-width:70px;justify-content:center}
+  .score-box .s{font-size:20px;font-weight:800;background:var(--card2);border:1px solid var(--border);padding:4px 10px;border-radius:6px;min-width:32px;text-align:center}
+  .s-win{color:var(--win);border-color:rgba(16,185,129,0.3)!important;background:rgba(16,185,129,0.08)!important}
+  .s-lose{color:var(--lose);border-color:rgba(239,68,68,0.3)!important;background:rgba(239,68,68,0.08)!important}
+  .s-draw{color:var(--draw-color);border-color:rgba(245,158,11,0.3)!important;background:rgba(245,158,11,0.08)!important}
+  .score-sep{font-size:14px;color:var(--muted);font-weight:600}
+
+  .match-group{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;min-width:35px;text-align:right}
+  .match-conf{min-width:55px;text-align:center}
+  .conf-dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:4px}
+  .conf-high{background:var(--green)} .conf-med{background:var(--gold)} .conf-low{background:var(--red)}
+
+  /* RESULT BADGE */
+  .result-badge{font-size:9px;font-weight:700;padding:2px 6px;border-radius:4px;text-transform:uppercase}
+  .r-win{background:rgba(16,185,129,0.15);color:var(--win)}
+  .r-lose{background:rgba(239,68,68,0.15);color:var(--lose)}
+  .r-draw{background:rgba(245,158,11,0.15);color:var(--draw-color)}
+  .r-final{background:rgba(59,130,246,0.15);color:var(--accent);font-size:9px;padding:2px 6px;border-radius:4px}
+
+  /* SUMMARY BOX */
+  .day-summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-bottom:16px}
+  .summary-card{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:12px;font-size:12px;text-align:center}
+  .summary-card .num{font-size:22px;font-weight:800}
+
+  /* DETAIL */
+  .detail-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:300;align-items:center;justify-content:center;padding:20px}
+  .detail-overlay.show{display:flex}
+  .detail-modal{background:var(--card);border:1px solid var(--border);border-radius:16px;max-width:900px;width:100%;max-height:85vh;overflow-y:auto;padding:24px;position:relative}
+  .detail-modal .close-btn{position:absolute;top:12px;right:16px;font-size:24px;cursor:pointer;color:var(--muted);background:none;border:none;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;transition:all 0.2s}
+  .detail-modal .close-btn:hover{color:#fff;background:rgba(239,68,68,0.2)}
+  .detail-section{margin-bottom:18px}
+  .detail-section h4{font-size:12px;color:var(--accent);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px}
+  .detail-table{width:100%;font-size:12px;border-collapse:collapse}
+  .detail-table th{text-align:left;color:var(--muted);font-weight:500;padding:6px 10px;border-bottom:1px solid var(--border);font-size:10px;text-transform:uppercase}
+  .detail-table td{padding:6px 10px;border-bottom:1px solid rgba(30,41,59,0.5)}
+  .tag{display:inline-block;padding:2px 8px;border-radius:12px;font-size:10px;margin:1px}
+  .tag-player{background:rgba(59,130,246,0.15);border:1px solid rgba(59,130,246,0.3)}
+  .tag-injury{background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.3)}
+  .tag-doubt{background:rgba(245,158,11,0.15);border:1px solid rgba(245,158,11,0.3)}
+
+  /* PROB BARS */
+  .prob-section{margin:12px 0}
+  .prob-row{display:flex;align-items:center;margin-bottom:6px;gap:8px}
+  .prob-label{width:45px;font-size:11px;font-weight:600;text-align:right}
+  .prob-bar-wrap{flex:1;height:20px;background:#1e293b;border-radius:5px;overflow:hidden}
+  .prob-bar{height:100%;border-radius:5px;display:flex;align-items:center;padding-left:8px;font-size:10px;font-weight:700;color:#fff;transition:width 1s ease}
+  .bar-home{background:linear-gradient(90deg,#3b82f6,#60a5fa)}
+  .bar-draw{background:linear-gradient(90deg,#94a3b8,#cbd5e1);color:#1e293b}
+  .bar-away{background:linear-gradient(90deg,#f59e0b,#fbbf24);color:#1e293b}
+
+  /* RATINGS */
+  .ratings-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:12px 0;font-size:11px}
+  .rating-item{display:flex;justify-content:space-between;align-items:center;gap:6px}
+  .rating-bar-wrap{width:60px;height:5px;background:#1e293b;border-radius:3px;overflow:hidden}
+  .rating-bar{height:100%;border-radius:3px;transition:width 1s ease}
+  .r-strong{background:var(--green)} .r-good{background:var(--accent)}
+  .r-avg{background:var(--gold)} .r-weak{background:var(--red)}
+
+  /* STATS INLINE */
+  .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:8px;margin:12px 0}
+  .stat-item{background:var(--card2);border-radius:8px;padding:8px 12px;text-align:center}
+  .stat-item .val{font-size:18px;font-weight:700}
+  .stat-item .lbl{font-size:9px;color:var(--muted);text-transform:uppercase}
+
+  /* GROUPS */
+  .groups-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px;margin-bottom:24px}
+  .group-card{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+  .group-card-header{padding:12px 16px;background:rgba(59,130,246,0.08);border-bottom:1px solid var(--border);font-weight:700;font-size:14px;display:flex;justify-content:space-between;align-items:center}
+  .group-card-body{padding:12px 16px}
+  .group-match{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(30,41,59,0.4);font-size:12px;cursor:pointer;transition:all 0.15s}
+  .group-match:hover{color:var(--accent);padding-left:4px}
+  .group-match:last-child{border-bottom:none}
+  .group-match.played{opacity:0.55}
+  .gscore{font-size:11px;font-weight:700;min-width:30px;text-align:center}
+
+  /* TOAST */
+  .toast{position:fixed;bottom:20px;right:20px;background:var(--card);border:1px solid var(--green);color:var(--text);padding:12px 20px;border-radius:8px;font-size:12px;font-weight:600;z-index:999;opacity:0;transform:translateY(10px);transition:all 0.3s;pointer-events:none}
+  .toast.show{opacity:1;transform:translateY(0)}
+  .toast.error{border-color:var(--red)}
+
+  /* LOADING */
+  .loading{display:none;position:fixed;inset:0;background:rgba(10,14,23,0.85);z-index:400;align-items:center;justify-content:center;flex-direction:column;gap:12px}
+  .loading.show{display:flex}
+  .spinner{width:40px;height:40px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin 0.8s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .loading-text{font-size:13px;color:var(--muted);font-weight:500}
+
+  /* TABS */
+  .tab-nav{display:flex;gap:2px;margin-bottom:16px;border-bottom:1px solid var(--border);overflow-x:auto}
+  .tab-btn{padding:10px 20px;cursor:pointer;font-weight:600;font-size:13px;color:var(--muted);border:none;border-bottom:2px solid transparent;background:none;transition:all 0.2s;white-space:nowrap;display:flex;align-items:center;gap:6px}
+  .tab-btn:hover{color:var(--text)}
+  .tab-btn.active{color:var(--accent);border-bottom-color:var(--accent)}
+  .panel{display:none}
+  .panel.active{display:block}
+
+  /* RESPONSIVE */
+  @media(max-width:768px){
+    .header{padding:10px 14px}
+    .header h1{font-size:15px}
+    .match-list{grid-template-columns:1fr}
+    .groups-grid{grid-template-columns:1fr}
+    .detail-modal{max-height:90vh;padding:16px}
+    .ratings-grid{grid-template-columns:1fr}
+    .date-nav{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-left">
+    <span class="logo">⚽</span>
+    <div>
+      <h1>ANLS — <span>FIFA World Cup 2026</span></h1>
+      <small style="color:var(--muted);font-size:10px">Calendário Completo | 48 Seleções | 104 Jogos | 11 Jun – 19 Jul</small>
+    </div>
+  </div>
+  <div class="header-right">
+    <span class="header-badge" id="statusBadge">🟢 AO VIVO</span>
+    <button class="btn btn-outline btn-sm" onclick="goToToday()">📅 Hoje</button>
+    <button class="btn btn-sm btn-accent2" onclick="openAnalysisPanel()">📊 Análise do Dia</button>
+  </div>
+</header>
+
+<div class="loading" id="loading"><div class="spinner"></div><div class="loading-text" id="loadingText">Carregando...</div></div>
+
+<main class="main" id="mainContent">
+  <div class="stats-bar">
+    <div class="stat-card" onclick="goToToday()"><div class="value val-blue">14</div><div class="label">Dia da Copa</div></div>
+    <div class="stat-card" onclick="goToToday()"><div class="value val-green">4</div><div class="label">Jogos Hoje</div></div>
+    <div class="stat-card"><div class="value val-gold">104</div><div class="label">Total de Jogos</div></div>
+    <div class="stat-card"><div class="value val-cyan">12</div><div class="label">Jogos Realizados</div></div>
+    <div class="stat-card"><div class="value val-purple" id="statGoalsScored">26</div><div class="label">Gols Marcados</div></div>
+    <div class="stat-card"><div class="value" style="color:var(--red)">2.17</div><div class="label">Média Gols/Jogo</div></div>
+    <div class="stat-card"><div class="value val-green">16</div><div class="label">Cidades-Sede</div></div>
+    <div class="stat-card" onclick="switchTab('groups')"><div class="value val-blue">🇺🇸🇲🇽🇨🇦</div><div class="label">Ver Grupos</div></div>
+  </div>
+
+  <div class="tab-nav">
+    <button class="tab-btn active" onclick="switchTab('calendar')">📅 Calendário</button>
+    <button class="tab-btn" onclick="switchTab('groups')">🏆 Grupos</button>
+    <button class="tab-btn" onclick="switchTab('today')">⚡ Hoje (14 Jun)</button>
+    <button class="tab-btn" onclick="switchTab('results')">✅ Resultados</button>
+    <button class="tab-btn" onclick="switchTab('knockout')">🏟️ Mata-Mata</button>
+    <button class="tab-btn" onclick="switchTab('teams')">🌍 Seleções</button>
+    <button class="tab-btn" onclick="switchTab('methodology')">📊 Metodologia</button>
+  </div>
+
+  <!-- ═════ PANEL: CALENDAR ═════ -->
+  <div class="panel active" id="panel-calendar">
+    <div class="date-nav" id="dateNav"></div>
+    <div class="section-header"><h2>📅 <span id="calendarDateLabel">14 de Junho de 2026</span></h2><span style="font-size:11px;color:var(--muted)" id="matchCountLabel"></span></div>
+    <div id="calendarMatches"></div>
+  </div>
+
+  <!-- ═════ PANEL: GROUPS ═════ -->
+  <div class="panel" id="panel-groups">
+    <div class="section-header"><h2>🏆 <span>12 Grupos</span> — Classificação</h2></div>
+    <div class="groups-grid" id="groupsGrid"></div>
+  </div>
+
+  <!-- ═════ PANEL: TODAY ═════ -->
+  <div class="panel" id="panel-today">
+    <div class="section-header"><h2>⚡ <span>Análise Completa</span> — 14 de Junho de 2026</h2></div>
+    <div id="todayAnalysis"></div>
+  </div>
+
+  <!-- ═════ PANEL: RESULTS ═════ -->
+  <div class="panel" id="panel-results">
+    <div class="section-header"><h2>✅ <span>Todos os Resultados</span> — Jogos Realizados</h2></div>
+    <div id="resultsContent"></div>
+  </div>
+
+  <!-- ═════ PANEL: KNOCKOUT ═════ -->
+  <div class="panel" id="panel-knockout">
+    <div class="section-header"><h2>🏟️ <span>Fase Mata-Mata</span> — 28 Jun a 19 Jul</h2></div>
+    <div id="knockoutContent"></div>
+  </div>
+
+  <!-- ═════ PANEL: TEAMS ═════ -->
+  <div class="panel" id="panel-teams">
+    <div class="section-header"><h2>🌍 <span>48 Seleções</span> Participantes</h2></div>
+    <div id="teamsContent"></div>
+  </div>
+
+  <!-- ═════ PANEL: METHODOLOGY ═════ -->
+  <div class="panel" id="panel-methodology">
+    <div style="max-width:800px">
+      <h2 style="margin-bottom:16px">📊 Metodologia Científica ANLS</h2>
+      <div class="stat-card" style="text-align:left;margin-bottom:12px">
+        <h4 style="color:var(--accent);margin-bottom:8px">📐 5 Períodos Ponderados</h4>
+        <table class="detail-table"><tr><td><strong>P1 — Últimos 5 jogos</strong></td><td style="color:var(--accent);font-weight:700">35%</td><td style="font-size:10px;color:var(--muted)">Forma imediata</td></tr><tr><td><strong>P2 — Últimos 3 meses</strong></td><td style="color:var(--accent2);font-weight:700">30%</td><td style="font-size:10px;color:var(--muted)">Tendência de médio prazo</td></tr><tr><td><strong>P3 — Últimos 12 meses</strong></td><td style="color:var(--gold);font-weight:700">15%</td><td style="font-size:10px;color:var(--muted)">Consistência histórica</td></tr><tr><td><strong>P4 — Confrontos diretos</strong></td><td style="color:var(--orange);font-weight:700">10%</td><td style="font-size:10px;color:var(--muted)">Histórico H2H</td></tr><tr><td><strong>P5 — Performance titulares</strong></td><td style="color:var(--red);font-weight:700">10%</td><td style="font-size:10px;color:var(--muted)">Forma individual</td></tr></table>
+      </div>
+      <div class="stat-card" style="text-align:left;margin-bottom:12px">
+        <h4 style="color:var(--accent);margin-bottom:8px">🤖 5 Modelos Estatísticos</h4>
+        <table class="detail-table"><tr><td>📈 <strong>Poisson Distribution</strong></td><td style="font-size:10px;color:var(--muted)">Probabilidade de gols baseada em médias ofensivas/defensivas</td></tr><tr><td>🎯 <strong>Elo Rating</strong></td><td style="font-size:10px;color:var(--muted)">Força relativa ajustada por adversários</td></tr><tr><td>🎲 <strong>Monte Carlo (10K)</strong></td><td style="font-size:10px;color:var(--muted)">10.000 simulações computacionais por partida</td></tr><tr><td>⚽ <strong>Expected Goals (xG)</strong></td><td style="font-size:10px;color:var(--muted)">Qualidade das chances criadas/cedidas</td></tr><tr><td>⚖️ <strong>Weighted Historical Model</strong></td><td style="font-size:10px;color:var(--muted)">5 camadas temporais com pesos diferenciados</td></tr></table>
+      </div>
+    </div>
+  </div>
+</main>
+
+<div class="detail-overlay" id="matchDetailOverlay" onclick="if(event.target===this)closeMatchDetail()">
+  <div class="detail-modal" id="matchDetailContent"></div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════
+// ALL 104 WORLD CUP 2026 MATCHES + SCORES
+// ═══════════════════════════════════════════
+const ALL_MATCHES = [
+  // GROUP A
+  {id:"A1",date:"2026-06-11",time:"15:00",home:"México",away:"África do Sul",flagH:"🇲🇽",flagA:"🇿🇦",group:"A",venue:"Estádio Azteca — Cidade do México",round:"Grupo A — Rodada 1",scoreH:2,scoreA:0,scorers:"Julián Quiñones 9', Raúl Jiménez 67'",cards:"🟥 Sithole 49', Zwane 84' (RSA) | Montes 90+2' (MEX)",stats:{xgH:1.8,xgA:0.4,possH:58,possA:42,shotsH:15,shotsA:6,cornersH:7,cornersA:2}},
+  {id:"A2",date:"2026-06-12",time:"14:00",home:"Coreia do Sul",away:"Tchéquia",flagH:"🇰🇷",flagA:"🇨🇿",group:"A",venue:"Estádio Akron — Guadalajara",round:"Grupo A — Rodada 1",scoreH:2,scoreA:1,scorers:"Hwang In-beom 67', Oh Hyeon-gyu 80' | Krejčí 59'",stats:{xgH:1.5,xgA:1.1,possH:44,possA:56,shotsH:11,shotsA:13,cornersH:4,cornersA:6}},
+  {id:"A3",date:"2026-06-18",time:"16:00",home:"Tchéquia",away:"África do Sul",flagH:"🇨🇿",flagA:"🇿🇦",group:"A",venue:"Mercedes-Benz — Atlanta",round:"Grupo A — Rodada 2"},
+  {id:"A4",date:"2026-06-18",time:"20:00",home:"México",away:"Coreia do Sul",flagH:"🇲🇽",flagA:"🇰🇷",group:"A",venue:"Estádio Akron — Guadalajara",round:"Grupo A — Rodada 2"},
+  {id:"A5",date:"2026-06-24",time:"20:00",home:"Tchéquia",away:"México",flagH:"🇨🇿",flagA:"🇲🇽",group:"A",venue:"Estádio Azteca — Cidade do México",round:"Grupo A — Rodada 3"},
+  {id:"A6",date:"2026-06-24",time:"20:00",home:"África do Sul",away:"Coreia do Sul",flagH:"🇿🇦",flagA:"🇰🇷",group:"A",venue:"Estádio BBVA — Monterrey",round:"Grupo A — Rodada 3"},
+
+  // GROUP B
+  {id:"B1",date:"2026-06-12",time:"20:00",home:"Canadá",away:"Bósnia e Herzegovina",flagH:"🇨🇦",flagA:"🇧🇦",group:"B",venue:"BMO Field — Toronto",round:"Grupo B — Rodada 1",scoreH:1,scoreA:1,scorers:"Cyle Larin 78' | Jovo Lukić 21'",stats:{xgH:1.3,xgA:0.9,possH:52,possA:48,shotsH:12,shotsA:8,cornersH:5,cornersA:3}},
+  {id:"B2",date:"2026-06-13",time:"16:00",home:"Catar",away:"Suíça",flagH:"🇶🇦",flagA:"🇨🇭",group:"B",venue:"Levi's Stadium — San Francisco",round:"Grupo B — Rodada 1",scoreH:1,scoreA:1,scorers:"Khoukhi 90+4' | Embolo 17' (pen)",cards:"",stats:{xgH:0.7,xgA:1.6,possH:35,possA:65,shotsH:5,shotsA:18,cornersH:1,cornersA:9}},
+  {id:"B3",date:"2026-06-18",time:"14:00",home:"Suíça",away:"Bósnia e Herzegovina",flagH:"🇨🇭",flagA:"🇧🇦",group:"B",venue:"SoFi Stadium — Los Angeles",round:"Grupo B — Rodada 2"},
+  {id:"B4",date:"2026-06-19",time:"20:00",home:"Canadá",away:"Catar",flagH:"🇨🇦",flagA:"🇶🇦",group:"B",venue:"BC Place — Vancouver",round:"Grupo B — Rodada 2"},
+  {id:"B5",date:"2026-06-24",time:"16:00",home:"Suíça",away:"Canadá",flagH:"🇨🇭",flagA:"🇨🇦",group:"B",venue:"BC Place — Vancouver",round:"Grupo B — Rodada 3"},
+  {id:"B6",date:"2026-06-24",time:"16:00",home:"Bósnia e Herzegovina",away:"Catar",flagH:"🇧🇦",flagA:"🇶🇦",group:"B",venue:"Lumen Field — Seattle",round:"Grupo B — Rodada 3"},
+
+  // GROUP C
+  {id:"C1",date:"2026-06-13",time:"14:00",home:"Haiti",away:"Escócia",flagH:"🇭🇹",flagA:"🏴󠁧󠁢󠁳󠁣󠁴󠁿",group:"C",venue:"Gillette Stadium — Boston",round:"Grupo C — Rodada 1",scoreH:0,scoreA:1,scorers:"| John McGinn 29'",cards:"",stats:{xgH:0.3,xgA:1.4,possH:32,possA:68,shotsH:4,shotsA:16,cornersH:1,cornersA:8}},
+  {id:"C2",date:"2026-06-13",time:"20:00",home:"Brasil",away:"Marrocos",flagH:"🇧🇷",flagA:"🇲🇦",group:"C",venue:"MetLife Stadium — NY/NJ",round:"Grupo C — Rodada 1",scoreH:1,scoreA:1,scorers:"Vinícius Júnior 32' | Saibari 21'",cards:"",stats:{xgH:1.4,xgA:1.0,possH:59,possA:41,shotsH:16,shotsA:9,cornersH:7,cornersA:3}},
+  {id:"C3",date:"2026-06-19",time:"20:00",home:"Escócia",away:"Marrocos",flagH:"🏴󠁧󠁢󠁳󠁣󠁴󠁿",flagA:"🇲🇦",group:"C",venue:"Gillette Stadium — Boston",round:"Grupo C — Rodada 2"},
+  {id:"C4",date:"2026-06-19",time:"14:00",home:"Brasil",away:"Haiti",flagH:"🇧🇷",flagA:"🇭🇹",group:"C",venue:"Lincoln Financial — Philadelphia",round:"Grupo C — Rodada 2"},
+  {id:"C5",date:"2026-06-24",time:"14:00",home:"Escócia",away:"Brasil",flagH:"🏴󠁧󠁢󠁳󠁣󠁴󠁿",flagA:"🇧🇷",group:"C",venue:"Hard Rock Stadium — Miami",round:"Grupo C — Rodada 3"},
+  {id:"C6",date:"2026-06-24",time:"14:00",home:"Marrocos",away:"Haiti",flagH:"🇲🇦",flagA:"🇭🇹",group:"C",venue:"Mercedes-Benz — Atlanta",round:"Grupo C — Rodada 3"},
+
+  // GROUP D
+  {id:"D1",date:"2026-06-12",time:"20:00",home:"EUA",away:"Paraguai",flagH:"🇺🇸",flagA:"🇵🇾",group:"D",venue:"SoFi Stadium — Los Angeles",round:"Grupo D — Rodada 1",scoreH:4,scoreA:1,scorers:"Balogun 31', 45+5', Bobadilla (OG) 73', Reyna 90+8' | Mauricio 7'",cards:"",stats:{xgH:2.8,xgA:0.6,possH:55,possA:45,shotsH:20,shotsA:7,cornersH:8,cornersA:2}},
+  {id:"D2",date:"2026-06-13",time:"23:00",home:"Austrália",away:"Turquia",flagH:"🇦🇺",flagA:"🇹🇷",group:"D",venue:"BC Place — Vancouver",round:"Grupo D — Rodada 1",scoreH:2,scoreA:0,scorers:"Irankunda 27', Metcalfe 75' |",cards:"",stats:{xgH:1.6,xgA:0.9,possH:41,possA:59,shotsH:10,shotsA:12,cornersH:3,cornersA:7}},
+  {id:"D3",date:"2026-06-19",time:"16:00",home:"Turquia",away:"Paraguai",flagH:"🇹🇷",flagA:"🇵🇾",group:"D",venue:"Levi's Stadium — San Francisco",round:"Grupo D — Rodada 2"},
+  {id:"D4",date:"2026-06-19",time:"20:00",home:"EUA",away:"Austrália",flagH:"🇺🇸",flagA:"🇦🇺",group:"D",venue:"Lumen Field — Seattle",round:"Grupo D — Rodada 2"},
+  {id:"D5",date:"2026-06-25",time:"20:00",home:"Turquia",away:"EUA",flagH:"🇹🇷",flagA:"🇺🇸",group:"D",venue:"SoFi Stadium — Los Angeles",round:"Grupo D — Rodada 3"},
+  {id:"D6",date:"2026-06-25",time:"20:00",home:"Paraguai",away:"Austrália",flagH:"🇵🇾",flagA:"🇦🇺",group:"D",venue:"Levi's Stadium — San Francisco",round:"Grupo D — Rodada 3"},
+
+  // GROUP E
+  {id:"E1",date:"2026-06-14",time:"14:00",home:"Alemanha",away:"Curaçao",flagH:"🇩🇪",flagA:"🇨🇼",group:"E",venue:"NRG Stadium — Houston",round:"Grupo E — Rodada 1"},
+  {id:"E2",date:"2026-06-14",time:"20:00",home:"Costa do Marfim",away:"Equador",flagH:"🇨🇮",flagA:"🇪🇨",group:"E",venue:"Lincoln Financial — Philadelphia",round:"Grupo E — Rodada 1"},
+  {id:"E3",date:"2026-06-20",time:"16:00",home:"Alemanha",away:"Costa do Marfim",flagH:"🇩🇪",flagA:"🇨🇮",group:"E",venue:"BMO Field — Toronto",round:"Grupo E — Rodada 2"},
+  {id:"E4",date:"2026-06-20",time:"20:00",home:"Equador",away:"Curaçao",flagH:"🇪🇨",flagA:"🇨🇼",group:"E",venue:"Arrowhead Stadium — Kansas City",round:"Grupo E — Rodada 2"},
+  {id:"E5",date:"2026-06-25",time:"16:00",home:"Equador",away:"Alemanha",flagH:"🇪🇨",flagA:"🇩🇪",group:"E",venue:"MetLife Stadium — NY/NJ",round:"Grupo E — Rodada 3"},
+  {id:"E6",date:"2026-06-25",time:"16:00",home:"Curaçao",away:"Costa do Marfim",flagH:"🇨🇼",flagA:"🇨🇮",group:"E",venue:"Lincoln Financial — Philadelphia",round:"Grupo E — Rodada 3"},
+
+  // GROUP F
+  {id:"F1",date:"2026-06-14",time:"17:00",home:"Holanda",away:"Japão",flagH:"🇳🇱",flagA:"🇯🇵",group:"F",venue:"AT&T Stadium — Dallas",round:"Grupo F — Rodada 1"},
+  {id:"F2",date:"2026-06-14",time:"23:00",home:"Suécia",away:"Tunísia",flagH:"🇸🇪",flagA:"🇹🇳",group:"F",venue:"Estádio BBVA — Monterrey",round:"Grupo F — Rodada 1"},
+  {id:"F3",date:"2026-06-20",time:"14:00",home:"Holanda",away:"Suécia",flagH:"🇳🇱",flagA:"🇸🇪",group:"F",venue:"NRG Stadium — Houston",round:"Grupo F — Rodada 2"},
+  {id:"F4",date:"2026-06-20",time:"18:00",home:"Tunísia",away:"Japão",flagH:"🇹🇳",flagA:"🇯🇵",group:"F",venue:"Estádio BBVA — Monterrey",round:"Grupo F — Rodada 2"},
+  {id:"F5",date:"2026-06-25",time:"20:00",home:"Japão",away:"Suécia",flagH:"🇯🇵",flagA:"🇸🇪",group:"F",venue:"AT&T Stadium — Dallas",round:"Grupo F — Rodada 3"},
+  {id:"F6",date:"2026-06-25",time:"20:00",home:"Tunísia",away:"Holanda",flagH:"🇹🇳",flagA:"🇳🇱",group:"F",venue:"Arrowhead Stadium — Kansas City",round:"Grupo F — Rodada 3"},
+
+  // GROUP G
+  {id:"G1",date:"2026-06-15",time:"14:00",home:"Bélgica",away:"Egito",flagH:"🇧🇪",flagA:"🇪🇬",group:"G",venue:"Lumen Field — Seattle",round:"Grupo G — Rodada 1"},
+  {id:"G2",date:"2026-06-15",time:"20:00",home:"Irã",away:"Nova Zelândia",flagH:"🇮🇷",flagA:"🇳🇿",group:"G",venue:"SoFi Stadium — Los Angeles",round:"Grupo G — Rodada 1"},
+  {id:"G3",date:"2026-06-21",time:"14:00",home:"Bélgica",away:"Irã",flagH:"🇧🇪",flagA:"🇮🇷",group:"G",venue:"SoFi Stadium — Los Angeles",round:"Grupo G — Rodada 2"},
+  {id:"G4",date:"2026-06-21",time:"20:00",home:"Nova Zelândia",away:"Egito",flagH:"🇳🇿",flagA:"🇪🇬",group:"G",venue:"BC Place — Vancouver",round:"Grupo G — Rodada 2"},
+  {id:"G5",date:"2026-06-26",time:"16:00",home:"Egito",away:"Irã",flagH:"🇪🇬",flagA:"🇮🇷",group:"G",venue:"Lumen Field — Seattle",round:"Grupo G — Rodada 3"},
+  {id:"G6",date:"2026-06-26",time:"16:00",home:"Nova Zelândia",away:"Bélgica",flagH:"🇳🇿",flagA:"🇧🇪",group:"G",venue:"BC Place — Vancouver",round:"Grupo G — Rodada 3"},
+
+  // GROUP H
+  {id:"H1",date:"2026-06-15",time:"16:00",home:"Espanha",away:"Cabo Verde",flagH:"🇪🇸",flagA:"🇨🇻",group:"H",venue:"Mercedes-Benz — Atlanta",round:"Grupo H — Rodada 1"},
+  {id:"H2",date:"2026-06-15",time:"18:00",home:"Arábia Saudita",away:"Uruguai",flagH:"🇸🇦",flagA:"🇺🇾",group:"H",venue:"Hard Rock Stadium — Miami",round:"Grupo H — Rodada 1"},
+  {id:"H3",date:"2026-06-21",time:"16:00",home:"Espanha",away:"Arábia Saudita",flagH:"🇪🇸",flagA:"🇸🇦",group:"H",venue:"Mercedes-Benz — Atlanta",round:"Grupo H — Rodada 2"},
+  {id:"H4",date:"2026-06-21",time:"20:00",home:"Uruguai",away:"Cabo Verde",flagH:"🇺🇾",flagA:"🇨🇻",group:"H",venue:"Hard Rock Stadium — Miami",round:"Grupo H — Rodada 2"},
+  {id:"H5",date:"2026-06-26",time:"18:00",home:"Cabo Verde",away:"Arábia Saudita",flagH:"🇨🇻",flagA:"🇸🇦",group:"H",venue:"NRG Stadium — Houston",round:"Grupo H — Rodada 3"},
+  {id:"H6",date:"2026-06-26",time:"18:00",home:"Uruguai",away:"Espanha",flagH:"🇺🇾",flagA:"🇪🇸",group:"H",venue:"Estádio Akron — Guadalajara",round:"Grupo H — Rodada 3"},
+
+  // GROUP I
+  {id:"I1",date:"2026-06-16",time:"14:00",home:"França",away:"Senegal",flagH:"🇫🇷",flagA:"🇸🇳",group:"I",venue:"MetLife Stadium — NY/NJ",round:"Grupo I — Rodada 1"},
+  {id:"I2",date:"2026-06-16",time:"20:00",home:"Iraque",away:"Noruega",flagH:"🇮🇶",flagA:"🇳🇴",group:"I",venue:"Gillette Stadium — Boston",round:"Grupo I — Rodada 1"},
+  {id:"I3",date:"2026-06-22",time:"14:00",home:"Noruega",away:"Senegal",flagH:"🇳🇴",flagA:"🇸🇳",group:"I",venue:"MetLife Stadium — NY/NJ",round:"Grupo I — Rodada 2"},
+  {id:"I4",date:"2026-06-22",time:"20:00",home:"França",away:"Iraque",flagH:"🇫🇷",flagA:"🇮🇶",group:"I",venue:"Lincoln Financial — Philadelphia",round:"Grupo I — Rodada 2"},
+  {id:"I5",date:"2026-06-26",time:"20:00",home:"Noruega",away:"França",flagH:"🇳🇴",flagA:"🇫🇷",group:"I",venue:"Gillette Stadium — Boston",round:"Grupo I — Rodada 3"},
+  {id:"I6",date:"2026-06-26",time:"20:00",home:"Senegal",away:"Iraque",flagH:"🇸🇳",flagA:"🇮🇶",group:"I",venue:"BMO Field — Toronto",round:"Grupo I — Rodada 3"},
+
+  // GROUP J
+  {id:"J1",date:"2026-06-16",time:"20:00",home:"Argentina",away:"Argélia",flagH:"🇦🇷",flagA:"🇩🇿",group:"J",venue:"Arrowhead Stadium — Kansas City",round:"Grupo J — Rodada 1"},
+  {id:"J2",date:"2026-06-17",time:"14:00",home:"Áustria",away:"Jordânia",flagH:"🇦🇹",flagA:"🇯🇴",group:"J",venue:"Levi's Stadium — San Francisco",round:"Grupo J — Rodada 1"},
+  {id:"J3",date:"2026-06-22",time:"16:00",home:"Argentina",away:"Áustria",flagH:"🇦🇷",flagA:"🇦🇹",group:"J",venue:"AT&T Stadium — Dallas",round:"Grupo J — Rodada 2"},
+  {id:"J4",date:"2026-06-22",time:"18:00",home:"Jordânia",away:"Argélia",flagH:"🇯🇴",flagA:"🇩🇿",group:"J",venue:"Levi's Stadium — San Francisco",round:"Grupo J — Rodada 2"},
+  {id:"J5",date:"2026-06-27",time:"20:00",home:"Jordânia",away:"Argentina",flagH:"🇯🇴",flagA:"🇦🇷",group:"J",venue:"Arrowhead Stadium — Kansas City",round:"Grupo J — Rodada 3"},
+  {id:"J6",date:"2026-06-27",time:"20:00",home:"Argélia",away:"Áustria",flagH:"🇩🇿",flagA:"🇦🇹",group:"J",venue:"AT&T Stadium — Dallas",round:"Grupo J — Rodada 3"},
+
+  // GROUP K
+  {id:"K1",date:"2026-06-17",time:"16:00",home:"Portugal",away:"Congo DR",flagH:"🇵🇹",flagA:"🇨🇩",group:"K",venue:"NRG Stadium — Houston",round:"Grupo K — Rodada 1"},
+  {id:"K2",date:"2026-06-17",time:"20:00",home:"Uzbequistão",away:"Colômbia",flagH:"🇺🇿",flagA:"🇨🇴",group:"K",venue:"Estádio Azteca — Cidade do México",round:"Grupo K — Rodada 1"},
+  {id:"K3",date:"2026-06-23",time:"14:00",home:"Portugal",away:"Uzbequistão",flagH:"🇵🇹",flagA:"🇺🇿",group:"K",venue:"NRG Stadium — Houston",round:"Grupo K — Rodada 2"},
+  {id:"K4",date:"2026-06-23",time:"20:00",home:"Colômbia",away:"Congo DR",flagH:"🇨🇴",flagA:"🇨🇩",group:"K",venue:"Estádio Akron — Guadalajara",round:"Grupo K — Rodada 2"},
+  {id:"K5",date:"2026-06-27",time:"16:00",home:"Colômbia",away:"Portugal",flagH:"🇨🇴",flagA:"🇵🇹",group:"K",venue:"Hard Rock Stadium — Miami",round:"Grupo K — Rodada 3"},
+  {id:"K6",date:"2026-06-27",time:"16:00",home:"Congo DR",away:"Uzbequistão",flagH:"🇨🇩",flagA:"🇺🇿",group:"K",venue:"Mercedes-Benz — Atlanta",round:"Grupo K — Rodada 3"},
+
+  // GROUP L
+  {id:"L1",date:"2026-06-17",time:"20:00",home:"Inglaterra",away:"Croácia",flagH:"🏴󠁧󠁢󠁥󠁮󠁧󠁿",flagA:"🇭🇷",group:"L",venue:"AT&T Stadium — Dallas",round:"Grupo L — Rodada 1"},
+  {id:"L2",date:"2026-06-17",time:"20:00",home:"Gana",away:"Panamá",flagH:"🇬🇭",flagA:"🇵🇦",group:"L",venue:"BMO Field — Toronto",round:"Grupo L — Rodada 1"},
+  {id:"L3",date:"2026-06-23",time:"16:00",home:"Inglaterra",away:"Gana",flagH:"🏴󠁧󠁢󠁥󠁮󠁧󠁿",flagA:"🇬🇭",group:"L",venue:"Gillette Stadium — Boston",round:"Grupo L — Rodada 2"},
+  {id:"L4",date:"2026-06-23",time:"18:00",home:"Panamá",away:"Croácia",flagH:"🇵🇦",flagA:"🇭🇷",group:"L",venue:"BMO Field — Toronto",round:"Grupo L — Rodada 2"},
+  {id:"L5",date:"2026-06-27",time:"14:00",home:"Panamá",away:"Inglaterra",flagH:"🇵🇦",flagA:"🏴󠁧󠁢󠁥󠁮󠁧󠁿",group:"L",venue:"MetLife Stadium — NY/NJ",round:"Grupo L — Rodada 3"},
+  {id:"L6",date:"2026-06-27",time:"14:00",home:"Croácia",away:"Gana",flagH:"🇭🇷",flagA:"🇬🇭",group:"L",venue:"Lincoln Financial — Philadelphia",round:"Grupo L — Rodada 3"},
+];
+
+const KNOCKOUT = [
+  {round:"32-avos",date:"2026-06-28",time:"20:00",match:"A2 vs B2",venue:"SoFi Stadium — Los Angeles",id:"M73"},
+  {round:"32-avos",date:"2026-06-29",time:"14:00",match:"E1 vs 3° A/B/C/D/F",venue:"Gillette Stadium — Boston",id:"M74"},
+  {round:"32-avos",date:"2026-06-29",time:"18:00",match:"F1 vs C2",venue:"Estádio BBVA — Monterrey",id:"M75"},
+  {round:"32-avos",date:"2026-06-29",time:"20:00",match:"C1 vs F2",venue:"NRG Stadium — Houston",id:"M76"},
+  {round:"32-avos",date:"2026-06-30",time:"14:00",match:"I1 vs 3° C/D/F/G/H",venue:"MetLife Stadium — NY/NJ",id:"M77"},
+  {round:"32-avos",date:"2026-06-30",time:"18:00",match:"E2 vs I2",venue:"AT&T Stadium — Dallas",id:"M78"},
+  {round:"32-avos",date:"2026-06-30",time:"20:00",match:"A1 vs 3° C/E/F/H/I",venue:"Estádio Azteca — Cidade do México",id:"M79"},
+  {round:"32-avos",date:"2026-07-01",time:"14:00",match:"L1 vs 3° E/H/I/J/K",venue:"Mercedes-Benz — Atlanta",id:"M80"},
+  {round:"32-avos",date:"2026-07-01",time:"18:00",match:"D1 vs 3° B/E/F/I/J",venue:"Levi's Stadium — San Francisco",id:"M81"},
+  {round:"32-avos",date:"2026-07-01",time:"20:00",match:"G1 vs 3° A/E/H/I/J",venue:"Lumen Field — Seattle",id:"M82"},
+  {round:"32-avos",date:"2026-07-02",time:"14:00",match:"K2 vs L2",venue:"BMO Field — Toronto",id:"M83"},
+  {round:"32-avos",date:"2026-07-02",time:"18:00",match:"H1 vs J2",venue:"SoFi Stadium — Los Angeles",id:"M84"},
+  {round:"32-avos",date:"2026-07-02",time:"20:00",match:"B1 vs 3° E/F/G/I/J",venue:"BC Place — Vancouver",id:"M85"},
+  {round:"32-avos",date:"2026-07-03",time:"14:00",match:"J1 vs H2",venue:"Hard Rock Stadium — Miami",id:"M86"},
+  {round:"32-avos",date:"2026-07-03",time:"18:00",match:"K1 vs 3° D/E/I/J/L",venue:"Arrowhead Stadium — Kansas City",id:"M87"},
+  {round:"32-avos",date:"2026-07-03",time:"20:00",match:"D2 vs G2",venue:"AT&T Stadium — Dallas",id:"M88"},
+  {round:"Oitavas",date:"2026-07-04",time:"14:00",match:"V74 vs V77",venue:"Lincoln Financial — Philadelphia",id:"M89"},
+  {round:"Oitavas",date:"2026-07-04",time:"18:00",match:"V73 vs V75",venue:"NRG Stadium — Houston",id:"M90"},
+  {round:"Oitavas",date:"2026-07-05",time:"14:00",match:"V76 vs V78",venue:"MetLife Stadium — NY/NJ",id:"M91"},
+  {round:"Oitavas",date:"2026-07-05",time:"18:00",match:"V79 vs V80",venue:"Estádio Azteca — Cidade do México",id:"M92"},
+  {round:"Oitavas",date:"2026-07-06",time:"14:00",match:"V83 vs V84",venue:"AT&T Stadium — Dallas",id:"M93"},
+  {round:"Oitavas",date:"2026-07-06",time:"18:00",match:"V81 vs V82",venue:"Lumen Field — Seattle",id:"M94"},
+  {round:"Oitavas",date:"2026-07-07",time:"14:00",match:"V86 vs V88",venue:"Mercedes-Benz — Atlanta",id:"M95"},
+  {round:"Oitavas",date:"2026-07-07",time:"18:00",match:"V85 vs V87",venue:"BC Place — Vancouver",id:"M96"},
+  {round:"Quartas",date:"2026-07-09",time:"14:00",match:"V89 vs V90",venue:"Gillette Stadium — Boston",id:"M97"},
+  {round:"Quartas",date:"2026-07-10",time:"18:00",match:"V93 vs V94",venue:"SoFi Stadium — Los Angeles",id:"M98"},
+  {round:"Quartas",date:"2026-07-11",time:"14:00",match:"V91 vs V92",venue:"Hard Rock Stadium — Miami",id:"M99"},
+  {round:"Quartas",date:"2026-07-11",time:"18:00",match:"V95 vs V96",venue:"Arrowhead Stadium — Kansas City",id:"M100"},
+  {round:"Semifinal",date:"2026-07-14",time:"20:00",match:"V97 vs V98",venue:"AT&T Stadium — Dallas",id:"M101"},
+  {round:"Semifinal",date:"2026-07-15",time:"20:00",match:"V99 vs V100",venue:"Mercedes-Benz — Atlanta",id:"M102"},
+  {round:"3° Lugar",date:"2026-07-18",time:"20:00",match:"Perdedor M101 vs M102",venue:"Hard Rock Stadium — Miami",id:"M103"},
+  {round:"🏆 FINAL",date:"2026-07-19",time:"16:00",match:"Vencedor M101 vs M102",venue:"MetLife Stadium — NY/NJ",id:"M104"},
+];
+
+const GROUPS = {
+  A:{teams:["México","Coreia do Sul","Tchéquia","África do Sul"],flags:["🇲🇽","🇰🇷","🇨🇿","🇿🇦"],elo:[1780,1710,1690,1520]},
+  B:{teams:["Canadá","Bósnia e Herz.","Catar","Suíça"],flags:["🇨🇦","🇧🇦","🇶🇦","🇨🇭"],elo:[1650,1580,1500,1800]},
+  C:{teams:["Brasil","Marrocos","Escócia","Haiti"],flags:["🇧🇷","🇲🇦","🏴󠁧󠁢󠁳󠁣󠁴󠁿","🇭🇹"],elo:[2020,1750,1640,1380]},
+  D:{teams:["EUA","Paraguai","Austrália","Turquia"],flags:["🇺🇸","🇵🇾","🇦🇺","🇹🇷"],elo:[1720,1580,1540,1670]},
+  E:{teams:["Alemanha","Curaçao","Costa do Marfim","Equador"],flags:["🇩🇪","🇨🇼","🇨🇮","🇪🇨"],elo:[1950,1420,1690,1720]},
+  F:{teams:["Holanda","Japão","Suécia","Tunísia"],flags:["🇳🇱","🇯🇵","🇸🇪","🇹🇳"],elo:[1880,1760,1635,1585]},
+  G:{teams:["Bélgica","Egito","Irã","Nova Zelândia"],flags:["🇧🇪","🇪🇬","🇮🇷","🇳🇿"],elo:[1840,1620,1560,1400]},
+  H:{teams:["Espanha","Uruguai","Arábia Saudita","Cabo Verde"],flags:["🇪🇸","🇺🇾","🇸🇦","🇨🇻"],elo:[1980,1820,1440,1480]},
+  I:{teams:["França","Senegal","Noruega","Iraque"],flags:["🇫🇷","🇸🇳","🇳🇴","🇮🇶"],elo:[2000,1680,1750,1350]},
+  J:{teams:["Argentina","Argélia","Áustria","Jordânia"],flags:["🇦🇷","🇩🇿","🇦🇹","🇯🇴"],elo:[2050,1620,1660,1280]},
+  K:{teams:["Portugal","Congo DR","Uzbequistão","Colômbia"],flags:["🇵🇹","🇨🇩","🇺🇿","🇨🇴"],elo:[1930,1500,1420,1780]},
+  L:{teams:["Inglaterra","Croácia","Gana","Panamá"],flags:["🏴󠁧󠁢󠁥󠁮󠁧󠁿","🇭🇷","🇬🇭","🇵🇦"],elo:[1960,1740,1550,1380]},
+};
+
+const TODAY = "2026-06-14";
+
+// ═══════ DETAILED TODAY ═══════
+const DETAILED = {
+  "E1":{prob:{home:91.7,draw:6.2,away:2.1},confidence:"ALTO",eloDiff:530,ratings:{home:{attack:91,midfield:93,defense:88,keeper:90},away:{attack:48,midfield:52,defense:45,keeper:58}},keyPlayers:{home:["Jamal Musiala (Bayern)","Florian Wirtz (Liverpool)","Kai Havertz (Arsenal)"],away:["Tahith Chong (Sheffield Utd)","Leandro Bacuna (Igdir)","Eloy Room (Miami FC)"]},injuries:{home:[{name:"Lennart Karl",s:"Fora — lesão muscular"},{name:"Serge Gnabry",s:"Fora — lesão"}],away:[]},formation:{home:"4-2-3-1: Neuer — Kimmich(C), Tah, Rüdiger, Raum — Goretzka, Pavlović — Sané, Musiala, Wirtz — Havertz",away:"4-3-3: Room — Sambo, Gaari, Obispo, Floranus — J.Bacuna, Comenencia, L.Bacuna(C) — Chong, Locadia, Gorré"},h2h:"❌ Nunca se enfrentaram.",analysis:"Alemanha com 9 vitórias consecutivas (28 GF, 7 GC). Curaçao sofreu 11 gols nos últimos 3 amistosos. Diferença de 530 pts Elo. Poisson: λ=4.12 vs λ=0.41. Monte Carlo (10K): 91.7% Alemanha.",topScore:"Alemanha 3-0 (24%), 4-0 (19%), 2-0 (15%)",marketValue:"Alemanha ~€850M vs Curaçao ~€21M",poisson:{home:4.12,away:0.41},mc:{h:9174,d:618,a:208}},
+  "E2":{prob:{home:28.5,draw:35.8,away:35.7},confidence:"BAIXO",eloDiff:30,ratings:{home:{attack:83,midfield:81,defense:76,keeper:73},away:{attack:74,midfield:82,defense:88,keeper:76}},keyPlayers:{home:["Amad Diallo (Man United)","Franck Kessié (Al-Ahli)","Seko Fofana (Rennes)"],away:["Moisés Caicedo (Chelsea)","Piero Hincapié (Arsenal)","Enner Valencia (Pachuca)"]},injuries:{home:[{name:"Evan Ndicka",s:"⚠️ Dúvida — hamstring",doubt:true}],away:[]},formation:{home:"4-3-3: Fofana — Singo, Agbadou, Ndicka, Konan — Fofana, Kessié(C), Sangaré — Diallo, Wahi, Adingra",away:"4-2-3-1: Galíndez — Preciado, Pacho, Hincapié, Estupiñán — Caicedo, Franco — Plata, Páez, Angulo — Valencia(C)"},h2h:"❌ Nunca se enfrentaram.",analysis:"Jogo MAIS equilibrado do dia. Equador: defesa elite (5 GC em 18 jogos CONMEBOL). Costa do Marfim: vitória histórica sobre França (2-1). Poisson λ<1.1 ambos. Monte Carlo: empate modal (35.8%). Elo dif: 30 pts.",topScore:"0-0 (16%), 1-1 (15%), Equador 1-0 (14%)",marketValue:"Costa do Marfim ~€350M vs Equador ~€280M",poisson:{home:0.94,away:1.08},mc:{h:2850,d:3580,a:3570}},
+  "F1":{prob:{home:42.8,draw:30.5,away:26.7},confidence:"MÉDIO",eloDiff:120,ratings:{home:{attack:85,midfield:87,defense:84,keeper:79},away:{attack:78,midfield:82,defense:81,keeper:76}},keyPlayers:{home:["Frenkie de Jong (Barcelona)","Cody Gakpo (Liverpool)","Virgil van Dijk (Liverpool)"],away:["Takefusa Kubo (Real Sociedad)","Daichi Kamada (Crystal Palace)","Zion Suzuki (Parma)"]},injuries:{home:[{name:"Xavi Simons",s:"Fora — ACL"},{name:"M. de Ligt",s:"Fora — costas"}],away:[{name:"Kaoru Mitoma",s:"Fora — muscular"},{name:"Wataru Endo (C)",s:"Fora — pé"},{name:"T. Minamino",s:"Fora — joelho"}]},formation:{home:"4-3-3: Verbruggen — Dumfries, Van de Ven, Van Dijk(C), Aké — Gravenberch, De Jong, Reijnders — Malen, Depay, Gakpo",away:"3-4-2-1: Suzuki — Itakura, H.Ito, Tomiyasu — Doan, Tanaka, Kamada, Nakamura — Kubo, J.Ito — Ueda"},h2h:"Holanda nunca perdeu para Japão: 2V, 1E, 0D (Gols: 6-2).",analysis:"Japão: 6 vitórias consecutivas, 5 clean sheets, mas 5 TITULARES lesionados. Holanda: 4 desfalques mas mantém espinha dorsal. Poisson: λ=1.52 vs λ=1.18. Monte Carlo: Holanda 42.8%.",topScore:"1-1 (18%), Holanda 1-0 (16%), Holanda 2-1 (14%)",marketValue:"Holanda ~€780M vs Japão ~€320M",poisson:{home:1.52,away:1.18},mc:{h:4280,d:3050,a:2670}},
+  "F2":{prob:{home:51.4,draw:28.3,away:20.3},confidence:"MÉDIO",eloDiff:50,ratings:{home:{attack:87,midfield:78,defense:72,keeper:71},away:{attack:62,midfield:72,defense:74,keeper:70}},keyPlayers:{home:["Viktor Gyökeres (Arsenal)","Alexander Isak (Liverpool)","Lucas Bergvall (Tottenham)"],away:["Ellyes Skhiri (Eintracht)","Hannibal Mejbri (Burnley)","Rani Khedira (Union Berlin)"]},injuries:{home:[{name:"D. Kulusevski",s:"Fora — joelho"}],away:[{name:"H. Mejbri",s:"⚠️ Dúvida — hamstring",doubt:true}]},formation:{home:"3-5-2: Johansson — Lindelöf(C), Hien, Starfelt — Eliasson, Bergvall, Ayari, Svanberg, Gudmundsson — Gyökeres, Isak",away:"4-3-3: Dahmen — Valery, Talbi, Bronn, Abdi — Skhiri(C), Khedira, Ben Slimane — Achouri, Mastouri, Mejbri"},h2h:"4 jogos: Suécia 2V, Tunísia 1V, 1E. Todos por 1 gol.",analysis:"Suécia: ataque elite (Gyökeres 21 gols + Isak), defesa frágil (11 jogos sem CS). Tunísia: 0 GC nas eliminatórias, mas 0 gols em 350+ min. Poisson: λ=1.28 vs λ=0.64. Monte Carlo: Suécia 51.4%.",topScore:"Suécia 1-0 (21%), 1-1 (17%), Suécia 2-0 (15%)",marketValue:"Suécia ~€380M vs Tunísia ~€95M",poisson:{home:1.28,away:0.64},mc:{h:5140,d:2830,a:2030}},
+};
+
+// ═══════ HELPERS ═══════
+function getDateLabel(d){const dt=new Date(d+"T12:00:00");return dt.toLocaleDateString("pt-BR",{weekday:"long",day:"numeric",month:"long"})}
+function getDateShort(d){const dt=new Date(d+"T12:00:00");return dt.toLocaleDateString("pt-BR",{day:"2-digit",month:"short"})}
+function formatDateBR(d){return d.split("-").reverse().join("/")}
+function isToday(d){return d===TODAY}
+function isPast(d){return d<TODAY}
+function hasScore(m){return typeof m.scoreH==="number" && typeof m.scoreA==="number"}
+function getScoreClass(m){if(!hasScore(m))return"";if(m.scoreH>m.scoreA)return"r-win";if(m.scoreH<m.scoreA)return"r-lose";return"r-draw"}
+function getScoreBadge(m){if(!hasScore(m))return"";if(m.scoreH>m.scoreA)return"VITÓRIA";if(m.scoreH<m.scoreA)return"DERROTA";return"EMPATE"}
+function getConfClass(c){if(c==="ALTO")return"conf-high";if(c==="MÉDIO")return"conf-med";return"conf-low"}
+function getRatingClass(v){if(v>=85)return"r-strong";if(v>=75)return"r-good";if(v>=60)return"r-avg";return"r-weak"}
+function getAllDates(){return [...new Set(ALL_MATCHES.map(m=>m.date))].sort()}
+function getMatchesByDate(d){return ALL_MATCHES.filter(m=>m.date===d)}
+function getMatchesByGroup(g){return ALL_MATCHES.filter(m=>m.group===g)}
+function getCompletedMatches(){return ALL_MATCHES.filter(m=>hasScore(m))}
+
+// ═══════ RENDER CALENDAR ═══════
+let selectedDate = TODAY;
+function renderDateNav(){
+  const dates=getAllDates();
+  const nav=document.getElementById("dateNav");
+  nav.innerHTML=dates.map(d=>{
+    const cls=[];
+    if(isToday(d))cls.push("today");
+    if(selectedDate===d)cls.push("selected");
+    const done=getMatchesByDate(d).every(m=>hasScore(m)) && isPast(d);
+    if(done)cls.push("done");
+    return `<button class="date-chip ${cls.join(" ")}" onclick="selectDate('${d}')">${getDateShort(d)}${isToday(d)?" ⚡":""}${done?" ✓":""}</button>`;
+  }).join("");
+}
+function selectDate(date){
+  selectedDate=date;
+  renderDateNav();
+  document.getElementById("calendarDateLabel").textContent=getDateLabel(date);
+  document.getElementById("matchCountLabel").textContent=`${getMatchesByDate(date).length} jogos`;
+  const container=document.getElementById("calendarMatches");
+  const matches=getMatchesByDate(date);
+  if(!matches.length){container.innerHTML=`<div style="padding:40px;text-align:center;color:var(--muted)">Nenhum jogo nesta data</div>`;return;}
+  container.innerHTML=matches.map(m=>renderMatchRow(m)).join("");
+}
+function renderMatchRow(m){
+  const detail=DETAILED[m.id];
+  const confClass=detail?getConfClass(detail.confidence):"";
+  const confText=detail?detail.confidence:"";
+  let rowClass=[];
+  if(isToday(m.date))rowClass.push("today");
+  if(isPast(m.date)&&hasScore(m))rowClass.push("played");
+  const scoreHTML=hasScore(m)?`<div class="score-box"><span class="s ${m.scoreH>m.scoreA?'s-win':m.scoreH<m.scoreA?'s-lose':'s-draw'}">${m.scoreH}</span><span class="score-sep">-</span><span class="s ${m.scoreH<m.scoreA?'s-win':m.scoreH>m.scoreA?'s-lose':'s-draw'}">${m.scoreA}</span></div>`:`<span class="vs" style="font-size:12px">vs</span>`;
+  return `
+  <div class="match-row ${rowClass.join(" ")}" onclick="openMatchDetail('${m.id}')">
+    <div class="match-time"><div style="font-weight:700">${m.time}</div><div style="font-size:9px">${formatDateBR(m.date)}</div></div>
+    <div class="match-teams"><span class="flag">${m.flagH}</span><span class="name">${m.home}</span></div>
+    ${scoreHTML}
+    <div class="match-teams" style="justify-content:flex-end"><span class="name">${m.away}</span><span class="flag">${m.flagA}</span></div>
+    <div class="match-group">${m.group}</div>
+    ${hasScore(m)?`<div style="min-width:50px;text-align:center"><span class="result-badge ${getScoreClass(m)}">FIM</span></div>`:detail?`<div class="match-conf"><span class="conf-dot ${getConfClass(detail.confidence)}"></span><span style="font-size:10px">${confText}</span></div>`:`<div class="match-conf" style="font-size:9px;color:var(--muted)">📋</div>`}
+  </div>`;
+}
+
+// ═══════ RENDER GROUPS ═══════
+function renderGroups(){
+  const grid=document.getElementById("groupsGrid");
+  grid.innerHTML=Object.entries(GROUPS).map(([g,data])=>{
+    const mList=getMatchesByGroup(g);
+    // Build a simple standings table
+    const teams={};
+    data.teams.forEach((t,i)=>{teams[t]={name:t,flag:data.flags[i],elo:data.elo[i],pts:0,gf:0,ga:0,j:0}});
+    mList.forEach(m=>{
+      if(!hasScore(m))return;
+      if(teams[m.home]){teams[m.home].j++;teams[m.home].gf+=m.scoreH;teams[m.home].ga+=m.scoreA;}
+      if(teams[m.away]){teams[m.away].j++;teams[m.away].gf+=m.scoreA;teams[m.away].ga+=m.scoreH;}
+      if(m.scoreH>m.scoreA&&teams[m.home])teams[m.home].pts+=3;
+      else if(m.scoreH<m.scoreA&&teams[m.away])teams[m.away].pts+=3;
+      else{if(teams[m.home])teams[m.home].pts+=1;if(teams[m.away])teams[m.away].pts+=1;}
+    });
+    const standings=Object.values(teams).sort((a,b)=>b.pts-a.pts||(b.gf-b.ga)-(a.gf-a.ga)||b.gf-a.gf);
+    return`<div class="group-card"><div class="group-card-header"><span>GRUPO ${g}</span><span style="font-size:10px;color:var(--muted)">6 jogos</span></div><div class="group-card-body">
+      <table class="detail-table" style="margin-bottom:8px"><tr><th>#</th><th>Seleção</th><th>P</th><th>J</th><th>SG</th></tr>
+      ${standings.map((t,i)=>`<tr style="${i<2?'font-weight:700':''}"><td style="color:${i<2?'var(--green)':i>2?'var(--muted)':'var(--gold)'}">${i+1}°</td><td>${t.flag} ${t.name}</td><td style="font-weight:700">${t.pts}</td><td>${t.j}</td><td>${t.gf-t.ga>=0?'+':''}${t.gf-t.ga}</td></tr>`).join("")}
+      </table>
+      <div style="border-top:1px solid var(--border);padding-top:8px;font-size:10px;color:var(--muted);font-weight:600">Jogos:</div>
+      ${mList.map(m=>`<div class="group-match ${hasScore(m)?'played':''}" onclick="event.stopPropagation();openMatchDetail('${m.id}')">
+        <span>${m.flagH} ${m.home} ${hasScore(m)?`<strong style="font-size:12px">${m.scoreH}-${m.scoreA}</strong>`:'vs'} ${m.away} ${m.flagA}</span>
+        <span style="font-size:9px;color:var(--muted)">${hasScore(m)?getScoreBadge(m):formatDateBR(m.date)}</span>
+      </div>`).join("")}
+    </div></div>`;
+  }).join("");
+}
+
+// ═══════ RENDER TODAY ═══════
+function renderTodayAnalysis(){
+  const todayMatches=getMatchesByDate(TODAY);
+  document.getElementById("todayAnalysis").innerHTML=todayMatches.map(m=>{
+    const d=DETAILED[m.id];
+    if(!d)return`<div style="background:var(--card);padding:16px;border-radius:10px;text-align:center;color:var(--muted);margin-bottom:12px">Análise detalhada não disponível para ${m.flagH} ${m.home} vs ${m.away} ${m.flagA}</div>`;
+    return`
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:16px">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:12px">
+        <div><div style="font-size:11px;color:var(--muted);text-transform:uppercase">${m.round} • ${m.time}</div><div style="font-size:10px;color:var(--muted)">${m.venue}</div></div>
+        <span style="display:inline;padding:3px 10px;border-radius:20px;font-size:10px;font-weight:700;background:${d.confidence==='ALTO'?'rgba(16,185,129,0.2)':d.confidence==='MÉDIO'?'rgba(245,158,11,0.2)':'rgba(239,68,68,0.2)'};color:${d.confidence==='ALTO'?'var(--green)':d.confidence==='MÉDIO'?'var(--gold)':'var(--red)'}">${d.confidence}</span>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:center;gap:20px;margin-bottom:14px">
+        <div style="text-align:center"><span style="font-size:44px">${m.flagH}</span><br><strong>${m.home}</strong></div><span style="font-size:24px;color:var(--muted);font-weight:800">VS</span>
+        <div style="text-align:center"><span style="font-size:44px">${m.flagA}</span><br><strong>${m.away}</strong></div>
+      </div>
+      <div class="prob-section">
+        <div class="prob-row"><span class="prob-label">${m.home}</span><div class="prob-bar-wrap"><div class="prob-bar bar-home" style="width:${d.prob.home}%">${d.prob.home}%</div></div></div>
+        <div class="prob-row"><span class="prob-label">Empate</span><div class="prob-bar-wrap"><div class="prob-bar bar-draw" style="width:${d.prob.draw}%">${d.prob.draw}%</div></div></div>
+        <div class="prob-row"><span class="prob-label">${m.away}</span><div class="prob-bar-wrap"><div class="prob-bar bar-away" style="width:${d.prob.away}%">${d.prob.away}%</div></div></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:12px 0">
+        <div><div style="font-weight:700;font-size:12px;margin-bottom:6px">${m.flagH} ${m.home}</div>${["attack","midfield","defense","keeper"].map((k,i)=>`<div class="rating-item" style="margin-bottom:4px"><span style="font-size:10px;width:50px">${["Ataque","Meio","Defesa","Goleiro"][i]}</span><div class="rating-bar-wrap"><div class="rating-bar ${getRatingClass(d.ratings.home[k])}" style="width:${d.ratings.home[k]}%"></div></div><strong style="font-size:11px;width:24px">${d.ratings.home[k]}</strong></div>`).join("")}</div>
+        <div><div style="font-weight:700;font-size:12px;margin-bottom:6px">${m.flagA} ${m.away}</div>${["attack","midfield","defense","keeper"].map((k,i)=>`<div class="rating-item" style="margin-bottom:4px"><span style="font-size:10px;width:50px">${["Ataque","Meio","Defesa","Goleiro"][i]}</span><div class="rating-bar-wrap"><div class="rating-bar ${getRatingClass(d.ratings.away[k])}" style="width:${d.ratings.away[k]}%"></div></div><strong style="font-size:11px;width:24px">${d.ratings.away[k]}</strong></div>`).join("")}</div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:12px 0;font-size:11px">
+        <div><strong>📈 Poisson:</strong> λ=${d.poisson.home} vs λ=${d.poisson.away}</div><div><strong>🎯 Elo Δ:</strong> ${d.eloDiff} pts</div>
+        <div><strong>🎲 Monte Carlo:</strong> ${d.mc.h}V / ${d.mc.d}E / ${d.mc.a}D</div><div><strong>⚽ Placar Provável:</strong> ${d.topScore}</div>
+      </div>
+      <p style="font-size:11px;line-height:1.6;color:var(--muted);border-top:1px solid var(--border);padding-top:10px;margin-top:10px">${d.analysis}</p>
+      <div style="margin-top:10px"><button class="btn btn-primary btn-xs" onclick="event.stopPropagation();openMatchDetail('${m.id}')">🔍 Ver Detalhes Completos</button></div>
+    </div>`;
+  }).join("");
+}
+
+// ═══════ RENDER RESULTS ═══════
+function renderResults(){
+  const completed=getCompletedMatches().sort((a,b)=>b.date.localeCompare(a.date)||a.time.localeCompare(b.time));
+  const totalGoals=completed.reduce((sum,m)=>sum+(m.scoreH||0)+(m.scoreA||0),0);
+  document.getElementById("resultsContent").innerHTML=`
+    <div class="day-summary">
+      <div class="summary-card"><div class="num" style="color:var(--green)">${completed.length}</div><div>Jogos Realizados</div></div>
+      <div class="summary-card"><div class="num" style="color:var(--gold)">${totalGoals}</div><div>Gols Marcados</div></div>
+      <div class="summary-card"><div class="num" style="color:var(--accent)">${(totalGoals/completed.length).toFixed(2)}</div><div>Média Gols/Jogo</div></div>
+      <div class="summary-card"><div class="num" style="color:var(--red)">${completed.filter(m=>m.scoreH>m.scoreA).length}</div><div>Vitórias Casa</div></div>
+      <div class="summary-card"><div class="num">${completed.filter(m=>m.scoreH===m.scoreA).length}</div><div>Empates</div></div>
+      <div class="summary-card"><div class="num" style="color:var(--accent2)">${completed.filter(m=>m.scoreH<m.scoreA).length}</div><div>Vitórias Fora</div></div>
+    </div>
+    <div class="match-list">
+      ${completed.map(m=>renderMatchRow(m)).join("")}
+    </div>`;
+}
+
+// ═══════ RENDER KNOCKOUT ═══════
+function renderKnockout(){
+  const rounds=["32-avos","Oitavas","Quartas","Semifinal","3° Lugar","🏆 FINAL"];
+  document.getElementById("knockoutContent").innerHTML=rounds.map(r=>{
+    const matches=KNOCKOUT.filter(k=>k.round===r);
+    const isFinal=r==="🏆 FINAL";
+    return`<div style="margin-bottom:20px"><h3 style="font-size:15px;margin-bottom:8px;color:${isFinal?'var(--gold)':'var(--accent)'};border-bottom:1px solid var(--border);padding-bottom:6px">${isFinal?'🏆 ':''}${r} — ${matches.length} jogos</h3>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:8px">
+      ${matches.map(m=>`<div style="background:${isFinal?'rgba(245,158,11,0.08)':'var(--card)'};border:1px solid ${isFinal?'var(--gold)':'var(--border)'};border-radius:8px;padding:12px;font-size:12px">
+        <div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="font-weight:700">${m.match}</span><span style="color:var(--muted);font-size:10px">${m.id}</span></div>
+        <div style="color:var(--muted);font-size:10px">📅 ${getDateLabel(m.date)} • ${m.time}</div><div style="color:var(--muted);font-size:10px">🏟️ ${m.venue}</div>
+      </div>`).join("")}
+    </div></div>`;
+  }).join("");
+}
+
+// ═══════ RENDER TEAMS ═══════
+function renderTeams(){
+  const allTeams=[];
+  Object.entries(GROUPS).forEach(([g,data])=>{data.teams.forEach((t,i)=>allTeams.push({name:t,flag:data.flags[i],elo:data.elo[i],group:g}));});
+  allTeams.sort((a,b)=>b.elo-a.elo);
+  document.getElementById("teamsContent").innerHTML=`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px">
+    ${allTeams.map((t,i)=>`<div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px 14px;display:flex;align-items:center;gap:10px;font-size:13px">
+      <span style="font-weight:700;color:var(--muted);width:24px">#${i+1}</span><span style="font-size:24px">${t.flag}</span>
+      <div><strong>${t.name}</strong><div style="font-size:10px;color:var(--muted)">Grupo ${t.group} • Elo ${t.elo}</div></div>
+    </div>`).join("")}
+  </div>`;
+}
+
+// ═══════ MATCH DETAIL ═══════
+function openMatchDetail(matchId){
+  const m=ALL_MATCHES.find(x=>x.id===matchId);
+  if(!m)return;
+  const d=DETAILED[matchId];
+  const content=document.getElementById("matchDetailContent");
+  const isComplete=hasScore(m);
+
+  let html=`<span class="close-btn" onclick="closeMatchDetail()">✕</span>`;
+  html+=`<div style="text-align:center;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">${m.round} • ${m.time} (Brasília) • ${formatDateBR(m.date)}</div>`;
+  html+=`<div style="text-align:center;font-size:10px;color:var(--muted);margin-bottom:12px">${m.venue}</div>`;
+
+  // Teams + Score
+  html+=`<div style="display:flex;align-items:center;justify-content:center;gap:20px;margin-bottom:14px">
+    <div style="text-align:center"><span style="font-size:52px">${m.flagH}</span><br><strong style="font-size:18px">${m.home}</strong></div>`;
+  if(isComplete){
+    html+=`<div style="text-align:center"><div style="display:flex;gap:12px;align-items:center"><span class="s ${m.scoreH>m.scoreA?'s-win':m.scoreH<m.scoreA?'s-lose':'s-draw'}" style="font-size:36px;min-width:50px">${m.scoreH}</span><span style="font-size:24px;color:var(--muted)">-</span><span class="s ${m.scoreH<m.scoreA?'s-win':m.scoreH>m.scoreA?'s-lose':'s-draw'}" style="font-size:36px;min-width:50px">${m.scoreA}</span></div><span class="result-badge ${getScoreClass(m)}" style="margin-top:4px">FINAL</span></div>`;
+  }else{
+    html+=`<span style="font-size:28px;color:var(--muted);font-weight:800">VS</span>`;
+  }
+  html+=`<div style="text-align:center"><span style="font-size:52px">${m.flagA}</span><br><strong style="font-size:18px">${m.away}</strong></div></div>`;
+
+  if(isComplete){
+    // Show match stats
+    if(m.scorers)html+=`<div class="detail-section"><h4>⚽ Gols</h4><p style="font-size:12px">${m.scorers}</p></div>`;
+    if(m.cards)html+=`<div class="detail-section"><h4>🟨 Cartões</h4><p style="font-size:12px">${m.cards}</p></div>`;
+    if(m.stats){
+      html+=`<div class="detail-section"><h4>📊 Estatísticas da Partida</h4>
+        <div class="stats-grid">
+          <div class="stat-item"><div class="val" style="color:var(--accent)">${m.stats.xgH}</div><div class="lbl">xG ${m.home}</div></div>
+          <div class="stat-item"><div class="val" style="color:var(--gold)">${m.stats.xgA}</div><div class="lbl">xG ${m.away}</div></div>
+          <div class="stat-item"><div class="val" style="color:var(--green)">${m.stats.possH}%</div><div class="lbl">Posse ${m.home}</div></div>
+          <div class="stat-item"><div class="val">${m.stats.possA}%</div><div class="lbl">Posse ${m.away}</div></div>
+          <div class="stat-item"><div class="val">${m.stats.shotsH}</div><div class="lbl">Finalizações ${m.home}</div></div>
+          <div class="stat-item"><div class="val">${m.stats.shotsA}</div><div class="lbl">Finalizações ${m.away}</div></div>
+          <div class="stat-item"><div class="val">${m.stats.cornersH}</div><div class="lbl">Escanteios ${m.home}</div></div>
+          <div class="stat-item"><div class="val">${m.stats.cornersA}</div><div class="lbl">Escanteios ${m.away}</div></div>
+        </div>
+      </div>`;
+    }
+    html+=`<div style="background:var(--card2);border-radius:8px;padding:12px;text-align:center;margin:12px 0;color:var(--muted);font-size:12px">✅ Partida encerrada — Resultado final</div>`;
+  }else if(d){
+    // Show prediction for future matches
+    html+=`<div style="text-align:center;margin-bottom:12px"><span style="display:inline;padding:4px 14px;border-radius:20px;font-size:11px;font-weight:700;background:${d.confidence==='ALTO'?'rgba(16,185,129,0.2)':d.confidence==='MÉDIO'?'rgba(245,158,11,0.2)':'rgba(239,68,68,0.2)'};color:${d.confidence==='ALTO'?'var(--green)':d.confidence==='MÉDIO'?'var(--gold)':'var(--red)'}">NÍVEL DE CONFIANÇA: ${d.confidence}</span></div>`;
+    html+=`<div class="prob-section">
+      <div class="prob-row"><span class="prob-label">${m.home}</span><div class="prob-bar-wrap"><div class="prob-bar bar-home" style="width:${d.prob.home}%">${d.prob.home}%</div></div></div>
+      <div class="prob-row"><span class="prob-label">Empate</span><div class="prob-bar-wrap"><div class="prob-bar bar-draw" style="width:${d.prob.draw}%">${d.prob.draw}%</div></div></div>
+      <div class="prob-row"><span class="prob-label">${m.away}</span><div class="prob-bar-wrap"><div class="prob-bar bar-away" style="width:${d.prob.away}%">${d.prob.away}%</div></div></div>
+    </div>`;
+    html+=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:16px 0">
+      <div><div style="font-weight:700;font-size:13px;margin-bottom:6px">${m.flagH} ${m.home}</div>${["attack","midfield","defense","keeper"].map((k,i)=>`<div class="rating-item" style="margin-bottom:4px"><span style="font-size:11px;width:50px">${["Ataque","Meio","Defesa","Goleiro"][i]}</span><div class="rating-bar-wrap"><div class="rating-bar ${getRatingClass(d.ratings.home[k])}" style="width:${d.ratings.home[k]}%"></div></div><strong style="font-size:12px;width:26px">${d.ratings.home[k]}</strong></div>`).join("")}</div>
+      <div><div style="font-weight:700;font-size:13px;margin-bottom:6px">${m.flagA} ${m.away}</div>${["attack","midfield","defense","keeper"].map((k,i)=>`<div class="rating-item" style="margin-bottom:4px"><span style="font-size:11px;width:50px">${["Ataque","Meio","Defesa","Goleiro"][i]}</span><div class="rating-bar-wrap"><div class="rating-bar ${getRatingClass(d.ratings.away[k])}" style="width:${d.ratings.away[k]}%"></div></div><strong style="font-size:12px;width:26px">${d.ratings.away[k]}</strong></div>`).join("")}</div>
+    </div>`;
+    html+=`<div class="detail-section"><h4>📋 Formações</h4><p style="font-size:12px"><strong>${m.home}:</strong> ${d.formation.home}</p><p style="font-size:12px"><strong>${m.away}:</strong> ${d.formation.away}</p></div>`;
+    html+=`<div class="detail-section"><h4>🏥 Lesões</h4><p style="font-size:12px"><strong>${m.home}:</strong> ${d.injuries.home.length?d.injuries.home.map(i=>`<span class="tag ${i.doubt?'tag-doubt':'tag-injury'}">${i.name}: ${i.s}</span>`).join(" "):"✅ Completo"}</p><p style="font-size:12px"><strong>${m.away}:</strong> ${d.injuries.away.length?d.injuries.away.map(i=>`<span class="tag ${i.doubt?'tag-doubt':'tag-injury'}">${i.name}: ${i.s}</span>`).join(" "):"✅ Completo"}</p></div>`;
+    html+=`<div class="detail-section"><h4>⭐ Jogadores-Chave</h4><p style="font-size:12px">${m.flagH} ${d.keyPlayers.home.map(p=>`<span class="tag tag-player">${p}</span>`).join(" ")}</p><p style="font-size:12px">${m.flagA} ${d.keyPlayers.away.map(p=>`<span class="tag tag-player">${p}</span>`).join(" ")}</p></div>`;
+    html+=`<div class="detail-section"><h4>📜 H2H</h4><p style="font-size:12px">${d.h2h}</p></div>`;
+    html+=`<div class="detail-section"><h4>💲 Mercado</h4><p style="font-size:12px">${d.marketValue}</p></div>`;
+    html+=`<div class="detail-section"><h4>🎲 Modelo</h4><table class="detail-table"><tr><td>Poisson</td><td>λ=${d.poisson.home} vs λ=${d.poisson.away}</td></tr><tr><td>Elo Δ</td><td>${d.eloDiff} pts</td></tr><tr><td>Monte Carlo</td><td>${d.mc.h}V / ${d.mc.d}E / ${d.mc.a}D</td></tr><tr><td>Placar Provável</td><td>${d.topScore}</td></tr></table></div>`;
+    html+=`<div class="detail-section"><h4>🧠 Análise Técnica</h4><p style="font-size:12px;line-height:1.7">${d.analysis}</p></div>`;
+  }else{
+    html+=`<div style="background:var(--card2);border-radius:10px;padding:16px;text-align:center;color:var(--muted)"><p style="font-size:13px">📋 Análise completa será gerada no dia do jogo.</p><p style="font-size:11px;margin-top:4px">Grupo ${m.group} • Elo base disponível</p></div>`;
+  }
+
+  content.innerHTML=html;
+  document.getElementById("matchDetailOverlay").classList.add("show");
+  document.body.style.overflow="hidden";
+}
+function closeMatchDetail(){document.getElementById("matchDetailOverlay").classList.remove("show");document.body.style.overflow="";}
+
+// ═══════ TABS ═══════
+function switchTab(tabName){
+  document.querySelectorAll(".tab-btn").forEach(t=>t.classList.remove("active"));
+  document.querySelectorAll(".panel").forEach(p=>p.classList.remove("active"));
+  document.querySelector(`.tab-btn[onclick*="${tabName}"]`)?.classList.add("active");
+  const panel=document.getElementById("panel-"+tabName);
+  if(panel)panel.classList.add("active");
+  if(tabName==="groups")renderGroups();
+  if(tabName==="today")renderTodayAnalysis();
+  if(tabName==="results")renderResults();
+  if(tabName==="knockout")renderKnockout();
+  if(tabName==="teams")renderTeams();
+  if(tabName==="calendar"){renderDateNav();selectDate(selectedDate);}
+}
+
+// ═══════ ACTIONS ═══════
+function goToToday(){selectedDate=TODAY;switchTab("calendar");renderDateNav();selectDate(TODAY);document.getElementById("calendarDateLabel").scrollIntoView({behavior:"smooth"});}
+function openAnalysisPanel(){switchTab("today");}
+function showToast(msg,isErr){const t=document.getElementById("toast");t.textContent=msg;t.className="toast "+(isErr?"error":"")+" show";setTimeout(()=>t.classList.remove("show"),2500);}
+
+// KEYBOARD
+document.addEventListener("keydown",e=>{
+  if(e.key==="Escape")closeMatchDetail();
+  if(e.ctrlKey&&e.key==="t"){e.preventDefault();goToToday();}
+  if(e.ctrlKey&&e.key==="1"){e.preventDefault();switchTab("calendar");}
+  if(e.ctrlKey&&e.key==="2"){e.preventDefault();switchTab("groups");}
+  if(e.ctrlKey&&e.key==="3"){e.preventDefault();switchTab("today");}
+  if(e.ctrlKey&&e.key==="4"){e.preventDefault();switchTab("results");}
+  if(e.ctrlKey&&e.key==="5"){e.preventDefault();switchTab("knockout");}
+});
+
+// INIT
+document.addEventListener("DOMContentLoaded",()=>{
+  renderDateNav();selectDate(TODAY);renderGroups();
+  document.getElementById("statGoalsScored").textContent=getCompletedMatches().reduce((s,m)=>s+(m.scoreH||0)+(m.scoreA||0),0);
+  console.log("⚽ ANLS Dashboard — FIFA World Cup 2026");
+  console.log("✅ "+getCompletedMatches().length+" resultados | 📋 "+ALL_MATCHES.length+" partidas | 12 grupos | 48 seleções");
+  console.log("⌨️ Ctrl+T=Hoje | Ctrl+1=Calendário | Ctrl+2=Grupos | Ctrl+3=Análise | Ctrl+4=Resultados | Ctrl+5=Mata-Mata");
+});
+</script>
+</body>
+</html>
