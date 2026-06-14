@@ -10,6 +10,12 @@ sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8')
 from google import genai
 
+def get_date_label(d):
+    """Formata data para exibicao."""
+    from datetime import datetime as dt
+    x = dt.strptime(d, "%Y-%m-%d")
+    return x.strftime("%d/%m")
+
 API_KEY = os.environ.get("GEMINI_API_KEY")
 if not API_KEY:
     print("ERRO: GEMINI_API_KEY nao configurada"); sys.exit(1)
@@ -206,10 +212,13 @@ def find_today_matches():
     m = []
     for line in SCHEDULE.strip().split("\n"):
         if line.startswith("GRUPO") or not line.strip(): continue
-        try:
-            d, mo = line.split(" ", 2)[0].split("/")
-            if f"2026-{mo.zfill(2)}-{d.zfill(2)}" == TODAY: m.append(line.strip())
-        except: continue
+        for sub_line in line.split(" | "):
+            sub_line = sub_line.strip()
+            if not sub_line: continue
+            try:
+                d, mo = sub_line.split(" ", 2)[0].split("/")
+                if f"2026-{mo.zfill(2)}-{d.zfill(2)}" == TODAY: m.append(sub_line)
+            except: continue
     return m
 
 def get_mode():
@@ -226,9 +235,37 @@ def get_active_leagues():
         if h in info["dias"]: ativas.append(f"{liga} ({info['nivel']} - {info['conf']})")
     return ativas, h
 
-mode, all_matches = get_mode()
+# ====== MULTI-DIA ======
+def find_future_matches(days=4):
+    """Retorna jogos de hoje + proximos N-1 dias, agrupados por data."""
+    from datetime import timedelta
+    all_dates = []
+    for i in range(days):
+        d = (_n + timedelta(days=i)).strftime("%Y-%m-%d")
+        all_dates.append(d)
+    by_date = {}
+    for line in SCHEDULE.strip().split("\n"):
+        if line.startswith("GRUPO") or not line.strip(): continue
+        # Divide linhas com multiplos jogos separados por |
+        for sub_line in line.split(" | "):
+            sub_line = sub_line.strip()
+            if not sub_line: continue
+            try:
+                day, month = sub_line.split(" ", 2)[0].split("/")
+                md = f"2026-{month.zfill(2)}-{day.zfill(2)}"
+                if md in all_dates:
+                    if md not in by_date: by_date[md] = []
+                    by_date[md].append(sub_line)
+            except: continue
+    return by_date, all_dates
+
+mode, today_matches = get_mode()
+future_matches, date_list = find_future_matches(4)
 print(f"\nModo: {'COPA DO MUNDO' if mode == 'worldcup' else 'LIGAS GLOBAIS'}")
-print(f"Itens hoje: {len(all_matches)}")
+for d in date_list:
+    ms = future_matches.get(d, [])
+    label = "HOJE" if d == TODAY else get_date_label(d)
+    print(f"  {d} ({label}): {len(ms)} jogos")
 
 completed = [l.strip() for l in SCHEDULE.strip().split("\n") if not l.startswith("GRUPO") and re.search(r'\d+-\d+', l)]
 print(f"Resultados: {len(completed)}")
@@ -251,28 +288,77 @@ def ask_gemini(prompt):
     return None
 
 # ====== PROMPTS ======
-def build_wc_prompt():
+def gather_team_info(matches_list):
+    """Coleta dados de todos os times em uma lista de partidas."""
     ti = []
-    for m in all_matches:
+    for m in matches_list:
         for tn in TEAM_DATA:
             if tn in m:
                 d = TEAM_DATA[tn]
                 ti.append(f"{tn}: Elo {d['elo']} | FIFA #{d['fifa']} | Atk {d['r_atk']} Mei {d['r_meio']} Def {d['r_def']} Gol {d['r_gol']} | MKT {d['mkt']} | {d['conf']}")
-    return f"""ANALISTA DE FUTEBOL PROFISSIONAL. Data: {TODAY_BR}. COPA DO MUNDO 2026.
-CALENDARIO:{SCHEDULE}
-DADOS:{chr(10).join(sorted(set(ti)))}
-CONTEXTO:{CONTEXT}
-JOGOS DE HOJE:{chr(10).join(all_matches)}
+    return chr(10).join(sorted(set(ti)))
 
-FORMATO HTML (fundo #111827, texto #e2e8f0). Para CADA partida:
-<h2>PARTIDA X: [A] vs [B]</h2>
-<h3 style="color:#10b981">PROBABILIDADES</h3><p>Vitoria A: XX% | Empate: XX% | Vitoria B: XX%</p><p style="font-size:12px">Poisson l=X.XX vs X.XX | Elo D=XXX pts | Monte Carlo 10K</p>
-<h3 style="color:#f59e0b">FORCA DO ELENCO (0-100)</h3><table style="width:100%;font-size:12px"><tr style="background:rgba(59,130,246,0.08)"><th></th><th>Atk</th><th>Mei</th><th>Def</th><th>Gol</th><th>Geral</th></tr></table>
-<h3 style="color:#06b6d4">JOGADORES-CHAVE</h3><h3 style="color:#ef4444">LESOES/DESFALQUES</h3>
-<h3 style="color:#8b5cf6">ANALISE TECNICA</h3><p style="line-height:1.8">3-5 linhas JUSTIFICANDO MATEMATICAMENTE com dados fornecidos</p>
-<h3 style="color:#f59e0b">PLACAR PROVAVEL (TOP 3)</h3><h3 style="color:#10b981">NIVEL DE CONFIANCA: [ALTO/MEDIO/BAIXO]</h3><hr>
-Depois de todas: <h2 style="color:#f59e0b">RANKING DE PREVISIBILIDADE</h2> (tabela do + ao - provavel) + <h2 style="color:#3b82f6">RESUMO ESTATISTICO</h2> (soma lambda, Over 2.5, BTTS, maior favorito, jogo mais equilibrado)
-REGRAS: NUNCA inventar. Usar APENAS dados fornecidos. % somam 100%. APENAS HTML inline (SEM ```html```, SEM <body>). l=(atk/100)*(def_adv/100)*3.5. ALTO>70% MEDIO 40-70% BAIXO<40%."""
+def build_matches_section(by_date, date_list):
+    """Constroi a secao de jogos agrupados por data."""
+    parts = []
+    labels = {0: "HOJE", 1: "AMANHA", 2: "DEPOIS DE AMANHA", 3: "3 DIAS"}
+    for i, d in enumerate(date_list):
+        ms = by_date.get(d, [])
+        if ms:
+            label = labels.get(i, f"Dia {d}")
+            parts.append(f"\n{label} ({get_date_label(d)}):\n" + "\n".join(ms))
+    return "\n".join(parts)
+
+def build_wc_prompt():
+    all_teams = set()
+    for ms in future_matches.values():
+        for m in ms:
+            for tn in TEAM_DATA:
+                if tn in m: all_teams.add(tn)
+    ti_lines = []
+    for tn in sorted(all_teams):
+        d = TEAM_DATA[tn]
+        ti_lines.append(f"{tn}: Elo {d['elo']} | FIFA #{d.get('fifa','-')} | Atk {d['r_atk']} Mei {d['r_meio']} Def {d['r_def']} Gol {d['r_gol']} | MKT {d['mkt']} | {d['conf']}")
+    return f"""ANALISTA DE FUTEBOL PROFISSIONAL DE ELITE. Data: {TODAY_BR}. COPA DO MUNDO FIFA 2026.
+
+CALENDARIO COMPLETO:{SCHEDULE}
+
+DADOS ESTATISTICOS:{chr(10).join(ti_lines)}
+
+CONTEXTO TATICO:{CONTEXT}
+
+JOGOS A ANALISAR (HOJE + PROXIMOS 3 DIAS):
+{build_matches_section(future_matches, date_list)}
+
+FORMATO DE SAIDA — para CADA DIA, use este cabecalho:
+<h2 style="color:#10b981;border:1px solid #10b981;padding:8px 16px;border-radius:8px;margin-top:24px">DIA: [DATA] — [HOJE/AMANHA/DEPOIS]</h2>
+
+Depois, para CADA PARTIDA do dia:
+<h3 style="color:#3b82f6">[TIME A] vs [TIME B]</h3>
+<p><strong style="color:#10b981">PROBABILIDADES:</strong> Vitória [A]: XX% | Empate: XX% | Vitória [B]: XX%</p>
+<p style="font-size:11px;color:#94a3b8">Poisson: GE=X.XX vs GE=X.XX (Gols Esperados) | Elo D=XXX pts | Monte Carlo 10K sims | xG | Weighted Historical</p>
+<table style="width:100%;font-size:11px;border-collapse:collapse;margin:8px 0"><tr style="background:rgba(59,130,246,0.08)"><th>Time</th><th>Atk</th><th>Mei</th><th>Def</th><th>Gol</th><th>Geral</th></tr><tr><td>[A]</td><td>XX</td><td>XX</td><td>XX</td><td>XX</td><td><strong>XX</strong></td></tr><tr><td>[B]</td><td>XX</td><td>XX</td><td>XX</td><td>XX</td><td><strong>XX</strong></td></tr></table>
+<p><strong style="color:#06b6d4">JOGADORES-CHAVE:</strong> [A]: Nome (clube) — motivo | [B]: Nome (clube) — motivo</p>
+<p><strong style="color:#ef4444">LESOES:</strong> listar desfalques reais de cada time</p>
+<p style="line-height:1.7"><strong style="color:#8b5cf6">ANALISE:</strong> 3-5 linhas justificando MATEMATICAMENTE com dados concretos (Poisson, Elo, ratings)</p>
+<p><strong style="color:#f59e0b">PLACAR PROVAVEL:</strong> 1) X-X (XX%) 2) X-X (XX%) 3) X-X (XX%)</p>
+<p><strong style="color:#10b981">CONFIANCA: [ALTO/MEDIO/BAIXO]</strong></p>
+<hr style="border-color:#1e293b">
+
+APOS TODOS OS DIAS, ADICIONE:
+<h2 style="color:#f59e0b">RANKING GERAL DE PREVISIBILIDADE (4 DIAS)</h2>
+<table style="width:100%;font-size:12px"><tr style="background:rgba(59,130,246,0.08)"><th>#</th><th>Data</th><th>Partida</th><th>Favorito</th><th>Prob</th><th>Confianca</th></tr></table>
+<h2 style="color:#3b82f6">RESUMO ESTATISTICO GERAL</h2>
+
+REGRAS ABSOLUTAS:
+1. NUNCA invente dados. Use APENAS os fornecidos no CALENDARIO e DADOS.
+2. TODAS as % somam 100%.
+3. JUSTIFIQUE MATEMATICAMENTE cada previsao.
+4. APENAS HTML inline (SEM ```html```, SEM <body>, SEM <head>).
+5. GE (Gols Esperados) = (atk/100) * (def_adv/100) * 3.5.
+6. ALTO > 70% | MEDIO 40-70% | BAIXO < 40%.
+7. Jogos ja realizados (com placar): apenas mostre o resultado, nao precisa prever.
+8. Seja CIRURGICO. Analista de elite, nao torcedor."""
 
 def build_league_prompt():
     cl, sl = [], []
@@ -291,26 +377,69 @@ Com base no seu conhecimento das temporadas de 2026, identifique 4-8 partidas RE
 
 PARA CADA PARTIDA USE O MESMO FORMATO PROFISSIONAL (HTML fundo #111827):
 <h2>[LIGA] — [A] vs [B]</h2>
-<h3 style="color:#10b981">PROBABILIDADES</h3><p>Vitoria A: XX% | Empate: XX% | Vitoria B: XX%</p><p style="font-size:12px">Poisson l | Elo D | Monte Carlo 10K</p>
+<h3 style="color:#10b981">PROBABILIDADES</h3><p>Vitoria A: XX% | Empate: XX% | Vitoria B: XX%</p><p style="font-size:12px">Poisson: GE (Gols Esperados) | Elo D | Monte Carlo 10K</p>
 <h3 style="color:#f59e0b">FORCA DO ELENCO</h3><table style="width:100%;font-size:12px"><tr style="background:rgba(59,130,246,0.08)"><th></th><th>Atk</th><th>Mei</th><th>Def</th><th>Gol</th><th>Geral</th></tr></table>
 <h3 style="color:#06b6d4">JOGADORES-CHAVE</h3><h3 style="color:#ef4444">LESOES</h3>
 <h3 style="color:#8b5cf6">ANALISE TECNICA</h3><p style="line-height:1.8">3-5 linhas justificando MATEMATICAMENTE</p>
 <h3 style="color:#f59e0b">PLACAR PROVAVEL TOP 3</h3><h3 style="color:#10b981">CONFIANCA</h3><hr>
 Depois: <h2 style="color:#f59e0b">RANKING DE PREVISIBILIDADE</h2> + <h2 style="color:#3b82f6">RESUMO ESTATISTICO</h2>
-REGRAS: Ratings EXATOS do banco. APENAS HTML inline. l=(atk/100)*(def_adv/100)*3.5. Min 4 max 8 partidas. Se time nao esta no banco, estime baseado em times similares da mesma liga."""
+REGRAS: Ratings EXATOS do banco. APENAS HTML inline. GE = (atk/100)*(def_adv/100)*3.5. Min 4 max 8 partidas. Se time nao esta no banco, estime baseado em times similares da mesma liga."""
+
+# ====== VERIFICADOR ======
+def verify_analysis(original_analysis, prompt_context):
+    """Segunda passagem: Gemini revisa e corrige a propria analise."""
+    print("\nVerificacao dupla — Gemini revisor...")
+    verify_prompt = f"""VOCE E UM REVISOR DE ANALISES ESPORTIVAS. Sua funcao e encontrar e corrigir ERROS.
+
+Abaixo esta uma analise de futebol gerada por IA. Revise MINUCIOSAMENTE:
+
+1. ERROS DE NOMES: times ou jogadores inventados? Corrija.
+2. ERROS DE PORCENTAGEM: as % somam 100%? Se nao, ajuste.
+3. ERROS DE DADOS: ratings, Elo, estatisticas batem com o banco abaixo?
+4. ERROS DE LOGICA: a analise faz sentido tatico?
+5. OMISSOES: faltou algum jogo do calendario?
+
+DADOS CORRETOS (use como referencia):
+{prompt_context[:3000]}
+
+ANALISE A REVISAR:
+{original_analysis[:12000]}
+
+INSTRUCOES:
+- Corrija qualquer erro encontrado.
+- Mantenha EXATAMENTE o mesmo formato HTML.
+- Se nao houver erros, retorne a analise original identica.
+- NAO adicione marcadores ```html```.
+- Retorne APENAS o HTML corrigido."""
+
+    verified = ask_gemini(verify_prompt)
+    if verified and len(verified) > 500:
+        print(f"   Verificacao concluida — {len(verified)} caracteres")
+        return verified
+    else:
+        print("   Verificacao falhou — usando analise original")
+        return original_analysis
 
 # ====== EXECUTAR ======
+total_matches = sum(len(ms) for ms in future_matches.values())
 if mode == "leagues":
-    print(f"\nLigas ativas: {', '.join([l.split(' ')[0] for l in all_matches]) if all_matches else 'detectando...'}")
+    print(f"\nLigas ativas: {', '.join([l.split(' ')[0] for l in today_matches]) if today_matches else 'detectando...'}")
     print("Gerando analise de ligas...")
     analysis = ask_gemini(build_league_prompt())
-elif not all_matches:
+elif total_matches == 0:
     print("\nDia sem jogos — resumo da Copa...")
     analysis = ask_gemini(f"""Analista profissional. Data: {TODAY_BR}. {SCHEDULE} {CONTEXT}
     Resumo profissional do status da Copa 2026 (HTML #111827, APENAS inline): 1. Resultados/destaques 2. Classificacao 3. Artilheiros 4. Estatisticas 5. Proximos jogos. Max 600 palavras.""")
 else:
-    print(f"\n{len(all_matches)} partidas — analise profissional Copa...")
-    analysis = ask_gemini(build_wc_prompt())
+    print(f"\n{total_matches} partidas em 4 dias — gerando analise multi-dia...")
+    prompt = build_wc_prompt()
+    print(f"Prompt: {len(prompt)} caracteres")
+    raw_analysis = ask_gemini(prompt)
+    if raw_analysis and len(raw_analysis) > 1000:
+        # Segunda passagem: verificador
+        analysis = verify_analysis(raw_analysis, prompt)
+    else:
+        analysis = raw_analysis
 
 if not analysis:
     analysis = f"""<div style="background:#111827;border:1px solid #1e293b;border-radius:14px;padding:24px;color:#e2e8f0;text-align:center">
@@ -351,9 +480,10 @@ inject("dashboard.html", analysis)
 inject("index.html", analysis)
 
 with open(".last-update", "w", encoding="utf-8") as f:
-    f.write(f"{datetime.now(BRT).strftime('%Y-%m-%d %H:%M BRT')} | Gemini | {mode} | {len(all_matches)} itens | v4")
+    f.write(f"{datetime.now(BRT).strftime('%Y-%m-%d %H:%M BRT')} | Gemini | {mode} | {total_matches} jogos em 4 dias | verificado | v5")
 
 print(f"\n{'='*70}")
-print(f"CONCLUIDO | {TODAY_BR} | {mode.upper()} | {len(all_matches)} itens")
+print(f"CONCLUIDO | {TODAY_BR} | {mode.upper()}")
+print(f"{total_matches} partidas analisadas em 4 dias | Dupla verificacao")
 print(f"https://fut-otez.onrender.com")
 print(f"{'='*70}")
