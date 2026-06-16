@@ -3,7 +3,7 @@ name: ⚽ ANLS — Análise Diária Automática
 on:
   schedule:
     - cron: "0 10 * * *"  # 10:00 UTC = 7:00 Brasília
-  workflow_dispatch:       # Botão manual no GitHub
+  workflow_dispatch:
 
 jobs:
   analyse:
@@ -19,13 +19,8 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Install dependencies
-        run: pip install requests google-genai
-
-      - name: ⚽ Rodar análise com Gemini
-        env:
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-        run: python update_football.py
+      - name: ⚽ Rodar análise automática (motor interno)
+        run: python auto_analysis.py
 
       - name: 💾 Commit e push automático
         run: |
